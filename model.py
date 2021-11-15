@@ -85,9 +85,13 @@ class Model:
         self.__view_controller = view_controller
 
         # All of type Square
+        # this may not be necessary, as using start and end alone essentially functions like a linked list
         self.__squares = []
         self.__start = None
         self.__end = None
+
+    def notify_view_controller(self):
+        self.__view_controller.update()
 
     # Called in view-controller
     def dijkstra(self, start, end, width, height):
@@ -105,6 +109,8 @@ class Model:
                     v.distance_from_source = u.distance_from_source + cost
                     v.pred = u
                     pq[v] = v.distance_from_source
+
+                self.notify_view_controller()
 
                 if v == self.__end:
                     return v
