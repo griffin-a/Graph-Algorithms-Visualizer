@@ -71,6 +71,14 @@ class Square:
     def pred(self, value):
         self.__pred = value
 
+    @property
+    def neighbors(self):
+        return self.__neighbors
+
+    @neighbors.setter
+    def neighbors(self, value):
+        self.__neighbors = value
+
 
 class Model:
     def __init__(self, view_controller):
@@ -83,10 +91,24 @@ class Model:
 
     # Called in view-controller
     def dijkstra(self, start, end, width, height):
-        done = set()
         pq = heapdict()
         start_square = Square(start[0], start[1], -1, 0, SquareType.START)
         pq[start_square] = 0
+
+        while pq:
+            u = pq.popitem()
+
+            for v in u.neighbors:
+                cost = math.dist((u.x, u.y), (v.x, v.y))
+
+                if u.distance_from_source + cost < v.distance_from_source:
+                    v.distance_from_source = u.distance_from_source + cost
+                    v.pred = u
+                    pq[v] = v.distance_from_source
+
+                if v == self.__end:
+                    return v
+
 
     # def dijkstra_modified(self, source, dest, width, height):
     #     done = set()
