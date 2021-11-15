@@ -1,7 +1,7 @@
 import math
 import pytest
 
-from dijkstra import dijkstra_modified, get_neighbors
+from model import dijkstra_modified, get_neighbors
 
 
 @pytest.fixture
