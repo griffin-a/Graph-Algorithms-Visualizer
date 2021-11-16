@@ -2,7 +2,6 @@ import pygame
 import model
 from eventmanager import *
 
-
 class GraphicalView(object):
     """
     Draws the model state onto the screen.
@@ -46,9 +45,9 @@ class GraphicalView(object):
             current_state = self.model.state.peek()
 
             if current_state == model.StateType.SELECTION:
-                self.render_selection()
+                self.render_grid()
             if current_state == model.StateType.RUNNING:
-                self.render_run()
+                self.render_grid()
             if current_state == model.StateType.PAUSED:
                 self.render_pause()
 
@@ -91,15 +90,27 @@ class GraphicalView(object):
         self.screen.blit(some_words, (0, 0))
         pygame.display.flip()
 
+    def render_grid(self):
+        WHITE = (255, 255, 255)
+        self.screen.fill(WHITE)
+        GRAY = (128, 128, 128)
+
+        # The number of squares is: (WIDTH / square width/height) * (HEIGHT / square width/height)
+        # Use this information to generate each of the squares
+        for x in range(0, model.WIDTH, 20):
+            for y in range(0, model.HEIGHT, 20):
+                pygame.draw.rect(self.screen, GRAY, (x, y, 20, 20), 3)
+        pygame.display.flip()
+
     def initialize(self):
         """
         Set up the pygame graphical display and loads graphical resources.
         """
 
-        result = pygame.init()
+        # result = pygame.init()
         pygame.font.init()
         pygame.display.set_caption('demo game')
-        self.screen = pygame.display.set_mode((600, 60))
+        self.screen = pygame.display.set_mode((model.WIDTH, model.HEIGHT))
         self.clock = pygame.time.Clock()
         self.small_font = pygame.font.Font(None, 40)
         self.is_initialized = True

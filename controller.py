@@ -27,11 +27,11 @@ class Keyboard(object):
             for event in pygame.event.get():
                 # handle window manager closing our window
                 if event.type == pygame.QUIT:
-                    self.__event_manager.Post(QuitEvent())
+                    self.__event_manager.post(QuitEvent())
                 # handle key down events
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        self.__event_manager.Post(StateChangeEvent(None))
+                        self.__event_manager.post(StateChangeEvent(None))
                     else:
                         current_state = self.__model.state.peek()
                         # The user has yet to select the start and end squares
