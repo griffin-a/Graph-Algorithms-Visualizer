@@ -107,7 +107,7 @@ class GraphicalView(object):
     def render_all(self, event=None):
         # self.init_grid()
 
-        for square in self.model.squares:
+        for square in self.model.squares.values():
             if square.square_type is model.SquareType.NORMAL:
                 pygame.draw.rect(self.screen, GRAY, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
             elif square.square_type is model.SquareType.START:

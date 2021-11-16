@@ -30,14 +30,6 @@ class Square:
         self.__square_type = square_type
         self.__pred = pred
 
-    def get_neighbors(self):
-        # # upper bound in range is exclusive not inclusive
-        for i in range(self.__x - SQUARE_SIZE, self.__x + (SQUARE_SIZE * 2), SQUARE_SIZE):
-            for j in range(self.__y - SQUARE_SIZE, self.__y + (SQUARE_SIZE * 2), SQUARE_SIZE):
-                print(f"({i}, {j})")
-                if (i, j) != (self.__x, self.__y) and (0 <= i < WIDTH and 0 <= j < HEIGHT):
-                    self.__neighbors.append((i, j))
-
     @property
     def distance_from_source(self):
         return self.__distance_from_source
@@ -100,13 +92,24 @@ class Model:
         # squares We want to create a square for each position in the grid
         # TODO: See if we need to alter each
         #  square's x,y coordinates to make each square at a distance of 1 from each other
-        self.__squares = [Square(x, y) for x in range(0, WIDTH, SQUARE_SIZE) for y in range(0, HEIGHT, SQUARE_SIZE)]
+        self.__squares = {(x, y): Square(x, y) for x in range(0, WIDTH, SQUARE_SIZE) for y in
+                          range(0, HEIGHT, SQUARE_SIZE)}
         self.__start = None
         self.__end = None
         self.__event_manager = event_manager
         self.__event_manager.register_listener(self)
         self.__running = False
         self.state = StateMachine()
+
+    def get_neighbors(self, square):
+        # # upper bound in range is exclusive not inclusive
+        for i in range(square.x - SQUARE_SIZE, square.x + (SQUARE_SIZE * 2), SQUARE_SIZE):
+            for j in range(square.y - SQUARE_SIZE, square.y + (SQUARE_SIZE * 2), SQUARE_SIZE):
+                print(f"({i}, {j})")
+                if (i, j) != (square.x, square.y) and (0 <= i < WIDTH and 0 <= j < HEIGHT):
+                    square.neighbors.append(self.__squares[(i, j)])
+
+        return square.neighbors
 
     def notify(self, event):
         """
@@ -132,14 +135,14 @@ class Model:
                 # Setting the start here
                 if event.char == "left_click":
                     # Now we search all of the squares to see which square was clicked on
-                    for square in self.__squares:
+                    for square in self.__squares.values():
                         if square.coordinate_in_square(clickpos[0], clickpos[1]):
                             # set the square to be the start square Now that we have picked a start square, we have to
                             # prevent the user from picking another start
                             # TODO: consider adding a new state to prevent
                             #  this from happening? Only allowing end square input
                             square.square_type = SquareType.START
-                            square.get_neighbors()
+                            self.get_neighbors(square)
                             self.__start = square
                             print(self.__start)
                             print(square.neighbors)
@@ -149,10 +152,10 @@ class Model:
                 elif event.char == "right_click":
                     # Post the end square to the view observer of model
                     print("right click in model")
-                    for square in self.__squares:
+                    for square in self.__squares.values():
                         if square.coordinate_in_square(clickpos[0], clickpos[1]):
                             square.square_type = SquareType.END
-                            square.get_neighbors()
+                            self.get_neighbors(square)
                             self.__end = square
                             print(self.__end)
                             print(square.neighbors)
@@ -184,8 +187,10 @@ class Model:
         while pq:
             # A tuple is returned, where the fist item is the square and the second value is the priority
             u = pq.popitem()[0]
+            print(u)
 
-            for v in u.neighbors:
+            for v in self.get_neighbors(u):
+                print(v)
                 cost = math.dist((u.x, u.y), (v.x, v.y))
 
                 if u.distance_from_source + cost < v.distance_from_source:
