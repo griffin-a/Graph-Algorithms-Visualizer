@@ -119,7 +119,7 @@ class GraphicalView(object):
             elif square.square_type is model.SquareType.END:
                 pygame.draw.rect(self.screen, RED, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
             elif square.square_type is model.SquareType.DONE:
-                pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+                pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
 
         pygame.display.flip()
 

@@ -200,7 +200,8 @@ class Model:
                     if u.distance_from_source + cost < v.distance_from_source:
                         v.distance_from_source = u.distance_from_source + cost
                         v.pred = u
-                        v.square_type = SquareType.DONE
+                        if v.square_type is not SquareType.END:
+                            v.square_type = SquareType.DONE
                         pq[v] = v.distance_from_source
 
                     # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
@@ -209,8 +210,23 @@ class Model:
                     self.__event_manager.post(new_tick)
 
                 if v == self.__end or v.square_type is SquareType.END:
+                    # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
+                    #  event
+                    shortest_path = self.get_shortest_path()
+                    for square in shortest_path:
+                        print(square)
                     self.__event_manager.post(StateChangeEvent(StateType.ENDED))
                     return v
+
+    def get_shortest_path(self):
+        current_square = self.__end
+        path = []
+
+        while current_square.pred != -1:
+            path.append(current_square)
+            current_square = current_square.pred
+
+        return path
 
     @property
     def start(self):
