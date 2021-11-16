@@ -38,14 +38,6 @@ class Square:
                     self.__neighbors.append((i, j))
 
     @property
-    def square_type(self):
-        return self.__square_type
-
-    @square_type.setter
-    def square_type(self, value):
-        self.__square_type = value
-
-    @property
     def distance_from_source(self):
         return self.__distance_from_source
 
@@ -224,6 +216,8 @@ class Model:
 class StateType(Enum):
     # The user has yet to select the start and end squares and press start
     SELECTION = 1,
+    # The user has picked the start and end, now they can generate walls if they wish
+    WALL = 5,
     # The simulation is running
     RUNNING = 2,
     # The simulation is paused

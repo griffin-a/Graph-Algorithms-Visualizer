@@ -57,9 +57,14 @@ class Keyboard(object):
     def handle_click(self, event):
         # Handle a left click
         if event.button == 1:
-            self.__event_manager.post(InputEvent("left_click", pygame.mouse.get_pos()))
+            # Prevent the user from selecting other squares as start or end once it's selected
+            # To select a new start/end, a state change is required
+            # Initiate state change to wall input
+            if not self.__model.start:
+                self.__event_manager.post(InputEvent("left_click", pygame.mouse.get_pos()))
         if event.button == 3:
-            self.__event_manager.post(InputEvent("right_click", pygame.mouse.get_pos()))
+            if not self.__model.end:
+                self.__event_manager.post(InputEvent("right_click", pygame.mouse.get_pos()))
 
     def key_down_selection(self, event):
         """
