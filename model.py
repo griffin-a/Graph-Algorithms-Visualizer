@@ -85,9 +85,20 @@ class Square:
     def neighbors(self, value):
         self.__neighbors = value
 
+    @property
+    def square_type(self):
+        return self.__square_type
+
+    @square_type.setter
+    def square_type(self, value):
+        self.__square_type = value
+
     # Given an (x,y) coordinate, returns if the coordinate is within the square
     def coordinate_in_square(self, x, y):
         return self.__x <= x <= self.__x + SQUARE_SIZE and self.__y <= y <= self.__y + SQUARE_SIZE
+
+    def __str__(self):
+        return f"Square at position: ({self.__x}, {self.__y}) of type: {self.__square_type}"
 
 
 class Model:
@@ -116,7 +127,7 @@ class Model:
             if not event.state:
                 # false if no more states are left
                 if not self.state.pop():
-                    self.__event_manager.Post(QuitEvent())
+                    self.__event_manager.post(QuitEvent())
             else:
                 # push a new state on the stack
                 self.state.push(event.state)
@@ -128,7 +139,12 @@ class Model:
                 # Now we search all of the squares to see which square was clicked on
                 for square in self.__squares:
                     if square.coordinate_in_square(clickpos[0], clickpos[1]):
-                        # set the square to be the start square
+                        # set the square to be the start square Now that we have picked a start square, we have to
+                        # prevent the user from picking another start
+                        # TODO: consider adding a new state to prevent
+                        #  this from happening? Only allowing end square input
+                        square.square_type = SquareType.START
+                        print(square)
                         break
 
     def run(self):
