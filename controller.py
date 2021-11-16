@@ -57,7 +57,7 @@ class Keyboard(object):
         # TODO: Only let state change to running occur once the user has picked the start and end nodes
         if event.key == pygame.K_SPACE:
             print("Running")
-            self.__event_manager.Post(StateChangeEvent(model.StateType.RUNNING))
+            self.__event_manager.post(StateChangeEvent(model.StateType.RUNNING))
 
     def key_down_pause(self, event):
         """

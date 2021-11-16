@@ -96,7 +96,7 @@ class Model:
         self.__event_manager = event_manager
         self.__event_manager.register_listener(self)
         self.__running = False
-        self.__state = StateMachine()
+        self.state = StateMachine()
 
     def notify(self, event):
         """
@@ -109,11 +109,11 @@ class Model:
             # pop request
             if not event.state:
                 # false if no more states are left
-                if not self.__state.pop():
+                if not self.state.pop():
                     self.__event_manager.Post(QuitEvent())
             else:
-                # push a new state on the stdack
-                self.__state.push(event.state)
+                # push a new state on the stack
+                self.state.push(event.state)
 
     def run(self):
         """
@@ -124,10 +124,14 @@ class Model:
         """
         self.__running = True
         self.__event_manager.post(InitializeEvent())
-        self.__state.push(StateType.SELECTION)
+        self.state.push(StateType.SELECTION)
         while self.__running:
-            # Run the algorithm, all the while, posting new events when appropriate
-            self.dijkstra()
+            if self.state.peek() == StateType.RUNNING:
+                # Run the algorithm, all the while, posting new events when appropriate
+                self.dijkstra()
+            elif self.state.peek() == StateType.SELECTION:
+                new_tick = TickEvent()
+                self.__event_manager.post(new_tick)
 
     def dijkstra(self):
         pq = heapdict()
