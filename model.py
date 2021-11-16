@@ -1,11 +1,16 @@
 from heapdict import heapdict
-
+from eventmanager import *
+"""
+This class encapsulates all inner state of the visualizer. 
+This includes, application logic and the grid with all of its respective squares
+"""
 # returns a tuple: (shortest_distance, pred)
 import math
 from collections import deque
 from enum import Enum
 
-from view_controller import ViewController
+
+WIDTH = HEIGHT = 600
 
 
 class SquareType(Enum):
@@ -28,7 +33,7 @@ class Square:
         # # upper bound in range is exclusive not inclusive
         for i in range(self.__x - 1, self.__x + 2):
             for j in range(self.__y - 1, self.__y + 2):
-                if (i, j) != (self.__x, self.__y) and (0 <= i < ViewController.width and 0 < j < ViewController.height):
+                if (i, j) != (self.__x, self.__y) and (0 <= i < WIDTH and 0 < j < HEIGHT):
                     self.__neighbors.append((i, j))
 
     @property
@@ -81,26 +86,45 @@ class Square:
 
 
 class Model:
-    def __init__(self, view_controller):
-        self.__view_controller = view_controller
-
+    def __init__(self, event_manager):
         # All of type Square
-        # this may not be necessary, as using start and end alone essentially functions like a linked list
-        self.__squares = []
+        # When we first initialize the model, we want to set the initial state of all of the squares
+        # We want to create a square for each position in the grid
+        self.__squares = [Square(x, y) for x in range(WIDTH) for y in range(HEIGHT)]
         self.__start = None
         self.__end = None
+        self.__event_manager = event_manager
+        self.__event_manager.register_listener(self)
+        self.__running = False
 
-    def notify_view_controller(self):
-        self.__view_controller.update()
+    def notify(self, event):
+        """
+        Called by an event in the message queue.
+        """
 
-    # Called in view-controller
-    def dijkstra(self, start, end, width, height):
+        if isinstance(event, QuitEvent):
+            self.__running = False
+
+    def run(self):
+        """
+        Starts the game engine loop.
+
+        This pumps a Tick event into the message queue for each loop.
+        The loop ends when this object hears a QuitEvent in notify().
+        """
+        self.__running = True
+        self.__event_manager.post(InitializeEvent())
+        while self.__running:
+            new_tick = TickEvent()
+            self.__event_manager.post(new_tick)
+
+    def dijkstra(self):
         pq = heapdict()
-        start_square = Square(start[0], start[1], -1, 0, SquareType.START)
-        pq[start_square] = 0
+        pq[self.__start] = 0
 
         while pq:
-            u = pq.popitem()
+            # A tuple is returned, where the fist item is the square and the second value is the priority
+            u = pq.popitem()[0]
 
             for v in u.neighbors:
                 cost = math.dist((u.x, u.y), (v.x, v.y))
@@ -110,51 +134,8 @@ class Model:
                     v.pred = u
                     pq[v] = v.distance_from_source
 
-                self.notify_view_controller()
+                # Tick update here: one iteration of the algorithm has finished, we now need to update
 
                 if v == self.__end:
                     return v
 
-
-    # def dijkstra_modified(self, source, dest, width, height):
-    #     done = set()
-    #     pq = []
-    #     distance = {(x, y): float("inf") for x in range(width) for y in range(height)}
-    #     is_wall = {(x, y): False for x in range(width) for y in range(height)}
-    #     distance[source] = 0
-    #     heapq.heappush(pq, (distance[source], source))
-    #     pred = {(x, y): -1 for x in range(width) for y in range(height)}
-    #
-    #     while pq:
-    #         u = heapq.heappop(pq)
-    #         neighbors = get_neighbors(u, width, height)
-    #
-    #         if u not in done:
-    #             done.add(u)
-    #
-    #             for v in neighbors:
-    #                 cost = math.dist(u[1], v)
-    #
-    #                 if distance[u[1]] + cost < distance[v]:
-    #                     distance[v] = distance[u[1]] + cost
-    #                     pred[v] = u[1]
-    #
-    #                     if v not in done:
-    #                         heapq.heappush(pq, (distance[v], v))
-    #
-    #                 if v == dest:
-    #                     print("Reached destination")
-    #                     return distance[dest], pred
-    #
-    # # Prints out the nodes that are taken on the shortest path from source to dest
-    # def get_shortest_path(pred, source, dest):
-    #     # Backtrack from the dest node to the source node to get the shortest path
-    #     path = deque()
-    #     temp_pred = pred[dest]
-    #     path.appendleft(dest)
-    #
-    #     while temp_pred != -1:
-    #         path.appendleft(temp_pred)
-    #         temp_pred = pred[temp_pred]
-    #
-    #     return path
