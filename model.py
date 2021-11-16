@@ -106,7 +106,7 @@ class Model:
         # # upper bound in range is exclusive not inclusive
         for i in range(square.x - SQUARE_SIZE, square.x + (SQUARE_SIZE * 2), SQUARE_SIZE):
             for j in range(square.y - SQUARE_SIZE, square.y + (SQUARE_SIZE * 2), SQUARE_SIZE):
-                print(f"({i}, {j})")
+                # print(f"({i}, {j})")
                 if (i, j) != (square.x, square.y) and (0 <= i < WIDTH and 0 <= j < HEIGHT):
                     square.neighbors.append(self.__squares[(i, j)])
 
@@ -143,6 +143,7 @@ class Model:
                             # TODO: consider adding a new state to prevent
                             #  this from happening? Only allowing end square input
                             square.square_type = SquareType.START
+                            square.distance_from_source = 0
                             self.get_neighbors(square)
                             self.__start = square
                             print(self.__start)
@@ -188,12 +189,12 @@ class Model:
         while pq:
             # A tuple is returned, where the fist item is the square and the second value is the priority
             u = pq.popitem()[0]
-            print(u)
+            print(f"u: {u}")
 
             for v in self.get_neighbors(u):
-                print(v)
+                print(f"v: {v}")
 
-                if v.square_type is SquareType.NORMAL:
+                if v.square_type is SquareType.NORMAL or v.square_type is SquareType.END:
                     cost = math.dist((u.x, u.y), (v.x, v.y))
 
                     if u.distance_from_source + cost < v.distance_from_source:
@@ -208,7 +209,7 @@ class Model:
                     self.__event_manager.post(new_tick)
 
                 if v == self.__end or v.square_type is SquareType.END:
-                    self.__event_manager.post(QuitEvent())
+                    self.__event_manager.post(StateChangeEvent())
                     return v
 
     @property
