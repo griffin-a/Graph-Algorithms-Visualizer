@@ -18,7 +18,8 @@ class SquareType(Enum):
     START = 1,
     END = 2,
     WALL = 3,
-    NORMAL = 4
+    NORMAL = 4,
+    DONE = 5
 
 
 class Square:
@@ -191,19 +192,23 @@ class Model:
 
             for v in self.get_neighbors(u):
                 print(v)
-                cost = math.dist((u.x, u.y), (v.x, v.y))
 
-                if u.distance_from_source + cost < v.distance_from_source:
-                    v.distance_from_source = u.distance_from_source + cost
-                    v.pred = u
-                    pq[v] = v.distance_from_source
+                if v.square_type is SquareType.NORMAL:
+                    cost = math.dist((u.x, u.y), (v.x, v.y))
 
-                # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
-                # We want to encapsulate the entire grid and priority queue to be able to draw the updated state
-                new_tick = TickEvent((self.__squares, pq))
-                self.__event_manager.post(new_tick)
+                    if u.distance_from_source + cost < v.distance_from_source:
+                        v.distance_from_source = u.distance_from_source + cost
+                        v.pred = u
+                        v.square_type = SquareType.DONE
+                        pq[v] = v.distance_from_source
 
-                if v == self.__end:
+                    # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
+                    # We want to encapsulate the entire grid and priority queue to be able to draw the updated state
+                    new_tick = TickEvent((self.__squares, pq))
+                    self.__event_manager.post(new_tick)
+
+                if v == self.__end or v.square_type is SquareType.END:
+                    self.__event_manager.post(QuitEvent())
                     return v
 
     @property
