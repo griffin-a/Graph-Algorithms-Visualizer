@@ -2,6 +2,10 @@ import pygame
 import model
 from eventmanager import *
 
+WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
 
 class GraphicalView(object):
     """
@@ -55,17 +59,17 @@ class GraphicalView(object):
             # limit the redraw speed to 30 frames per second
             self.clock.tick(30)
 
-    def render_selection(self):
-        """
-        Render the game menu.
-        """
-
-        self.screen.fill((0, 0, 0))
-        some_words = self.small_font.render(
-            'You are in the selection screen. Space to play. Esc exits.',
-            True, (0, 255, 0))
-        self.screen.blit(some_words, (0, 0))
-        pygame.display.flip()
+    # def render_selection(self):
+    #     """
+    #     Render the game menu.
+    #     """
+    #
+    #     self.screen.fill((0, 0, 0))
+    #     some_words = self.small_font.render(
+    #         'You are in the selection screen. Space to play. Esc exits.',
+    #         True, (0, 255, 0))
+    #     self.screen.blit(some_words, (0, 0))
+    #     pygame.display.flip()
 
     def render_run(self):
         """
@@ -95,23 +99,50 @@ class GraphicalView(object):
     # In reality, this is the only draw method that we need
     def render_grid(self, event=None):
 
-        WHITE = (255, 255, 255)
-        self.screen.fill(WHITE)
-        GRAY = (128, 128, 128)
+        # self.screen.fill(WHITE)
 
         # The number of squares is: (WIDTH / square width/height) * (HEIGHT / square width/height)
         # Use this information to generate each of the squares
-        for x in range(0, model.WIDTH, 20):
-            for y in range(0, model.HEIGHT, 20):
-                pygame.draw.rect(self.screen, GRAY, (x, y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
+        # for x in range(0, model.WIDTH, 20):
+        #     for y in range(0, model.HEIGHT, 20):
+        #         pygame.draw.rect(self.screen, GRAY, (x, y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
 
         if event.state:
+            squares = event.state
+            print(len(squares))
+
+            for square in squares:
+                if square.square_type is model.SquareType.NORMAL:
+                    pygame.draw.rect(self.screen, GRAY, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
+                elif square.square_type is model.SquareType.START:
+                    pygame.draw.rect(self.screen, GREEN, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+                elif square.square_type is model.SquareType.END:
+                    pygame.draw.rect(self.screen, RED, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+        # if event.state:
+        #     state = event.state
+        #     # Tick events will either be one square (start/end) or all of the squares on the grid
+        #     if event.name == "start":
+        #         pygame.draw.rect(self.screen, GREEN, (state.x, state.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+        #     elif event.name == "end":
+        #         print("End needs to be drawn")
+        #         pygame.draw.rect(self.screen, RED, (state.x, state.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+        pygame.display.flip()
+
+    def init_grid(self):
+        for x in range(0, model.WIDTH, 20):
+             for y in range(0, model.HEIGHT, 20):
+                 pygame.draw.rect(self.screen, GRAY, (x, y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
+
+    def render_selection(self, event=None):
+        if event.state:
+            state = event.state
             # Tick events will either be one square (start/end) or all of the squares on the grid
             if event.name == "start":
-                print("Start needs to be drawn")
+                pygame.draw.rect(self.screen, GREEN, (state.x, state.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
             elif event.name == "end":
                 print("End needs to be drawn")
-        pygame.display.flip()
+                pygame.draw.rect(self.screen, RED, (state.x, state.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+            pygame.display.flip()
 
     def initialize(self):
         """
@@ -125,3 +156,5 @@ class GraphicalView(object):
         self.clock = pygame.time.Clock()
         self.small_font = pygame.font.Font(None, 40)
         self.is_initialized = True
+        self.screen.fill(WHITE)
+        self.init_grid()

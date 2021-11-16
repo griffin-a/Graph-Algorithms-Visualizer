@@ -150,7 +150,7 @@ class Model:
                             print(self.__start)
                             break
                     # Post the start square to the view observer of model
-                    self.__event_manager.post(TickEvent("start", self.__start))
+                    self.__event_manager.post(TickEvent("start", self.__squares))
                 elif event.char == "right_click":
                     # Post the end square to the view observer of model
                     print("right click in model")
@@ -160,7 +160,7 @@ class Model:
                             self.__end = square
                             print(self.__end)
                             break
-                    self.__event_manager.post(TickEvent("end", self.__end))
+                    self.__event_manager.post(TickEvent("end", self.__squares))
 
     def run(self):
         """
