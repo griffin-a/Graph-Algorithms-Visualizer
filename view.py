@@ -40,11 +40,11 @@ class GraphicalView(object):
             self.is_initialized = False
             pygame.quit()
         elif isinstance(event, TickEvent):
-            self.render_all()
+            self.render_all(event)
             # limit the redraw speed to 30 frames per second
             self.clock.tick(30)
 
-    def render_all(self):
+    def render_all(self, render_info=None):
         """
         Draw the current game state on screen.
         Does nothing if is_initialized == False (pygame.init failed)
@@ -52,16 +52,20 @@ class GraphicalView(object):
 
         if not self.is_initialized:
             return
-        # clear display
-        self.screen.fill((0, 0, 0))
-        # draw some words on the screen
-        some_words = self.small_font.render(
-            'The View is busy drawing on your screen',
-            True,
-            (0, 255, 0))
-        self.screen.blit(some_words, (0, 0))
-        # flip the display to show whatever we drew
-        pygame.display.flip()
+        # # clear display
+        # self.screen.fill((0, 0, 0))
+        # # draw some words on the screen
+        # some_words = self.small_font.render(
+        #     'The View is busy drawing on your screen',
+        #     True,
+        #     (0, 255, 0))
+        # self.screen.blit(some_words, (0, 0))
+        # # flip the display to show whatever we drew
+        # pygame.display.flip()
+
+        # First clear the display
+        # Now we need to call draw_grid
+        # After the grid has been drawn, we need to draw the squares on the grid
 
     def initialize(self):
         """

@@ -26,9 +26,10 @@ class TickEvent(Event):
     Tick event.
     """
     # TODO: Add information that encapsulates changes to the underlying game structure
-    def __init__(self):
+    def __init__(self, state=None):
         super().__init__()
         self.name = "Tick event"
+        self.state = state
 
 
 class InputEvent(Event):

@@ -115,8 +115,8 @@ class Model:
         self.__running = True
         self.__event_manager.post(InitializeEvent())
         while self.__running:
-            new_tick = TickEvent()
-            self.__event_manager.post(new_tick)
+            # Run the algorithm, all the while, posting new events when appropriate
+            self.dijkstra()
 
     def dijkstra(self):
         pq = heapdict()
@@ -135,6 +135,9 @@ class Model:
                     pq[v] = v.distance_from_source
 
                 # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
+                # We want to encapsulate the entire grid and priority queue to be able to draw the updated state
+                new_tick = TickEvent((self.__squares, pq))
+                self.__event_manager.post(new_tick)
 
                 if v == self.__end:
                     return v
