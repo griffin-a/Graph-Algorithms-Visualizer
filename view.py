@@ -58,8 +58,9 @@ class GraphicalView(object):
             if current_state == model.StateType.PAUSED:
                 self.render_all()
             if current_state == model.StateType.ENDED:
-                print("Algorithm ended")
-                self.render_all(event)
+                # First draw the grid and then draw the shortest path
+                self.render_all()
+                self.render_path()
 
             # limit the redraw speed to 30 frames per second
             self.clock.tick(30)
@@ -121,10 +122,11 @@ class GraphicalView(object):
             elif square.square_type is model.SquareType.DONE:
                 pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
 
-        if event:
-            print(event.state)
-
         pygame.display.flip()
+
+    def render_path(self):
+        for square in self.model.shortest_path:
+            pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
 
     def initialize(self):
         """
