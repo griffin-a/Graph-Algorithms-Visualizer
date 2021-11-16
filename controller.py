@@ -62,6 +62,8 @@ class Keyboard(object):
             # Initiate state change to wall input
             if not self.__model.start:
                 self.__event_manager.post(InputEvent("left_click", pygame.mouse.get_pos()))
+            else:
+                self.__event_manager.post(InputEvent("left_click", pygame.mouse.get_pos()))
         if event.button == 3:
             if not self.__model.end:
                 self.__event_manager.post(InputEvent("right_click", pygame.mouse.get_pos()))

@@ -7,6 +7,7 @@ GRAY = (128, 128, 128)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 ORANGE = (255,165,0)
+BLACK = (0, 0, 0)
 
 
 class GraphicalView(object):
@@ -121,6 +122,8 @@ class GraphicalView(object):
                 pygame.draw.rect(self.screen, RED, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
             elif square.square_type is model.SquareType.DONE:
                 pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
+            elif square.square_type is model.SquareType.WALL:
+                pygame.draw.rect(self.screen, BLACK, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
 
         pygame.display.flip()
 

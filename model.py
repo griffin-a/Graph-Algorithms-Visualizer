@@ -108,7 +108,7 @@ class Model:
         for i in range(square.x - SQUARE_SIZE, square.x + (SQUARE_SIZE * 2), SQUARE_SIZE):
             for j in range(square.y - SQUARE_SIZE, square.y + (SQUARE_SIZE * 2), SQUARE_SIZE):
                 # print(f"({i}, {j})")
-                if (i, j) != (square.x, square.y) and (0 <= i < WIDTH and 0 <= j < HEIGHT):
+                if (i, j) != (square.x, square.y) and (0 <= i < WIDTH and 0 <= j < HEIGHT) and self.__squares[(i,j)].square_type is not SquareType.WALL:
                     square.neighbors.append(self.__squares[(i, j)])
 
         return square.neighbors
@@ -137,21 +137,29 @@ class Model:
                 # Setting the start here
                 if event.char == "left_click":
                     # Now we search all of the squares to see which square was clicked on
-                    for square in self.__squares.values():
-                        if square.coordinate_in_square(clickpos[0], clickpos[1]):
-                            # set the square to be the start square Now that we have picked a start square, we have to
-                            # prevent the user from picking another start
-                            # TODO: consider adding a new state to prevent
-                            #  this from happening? Only allowing end square input
-                            square.square_type = SquareType.START
-                            square.distance_from_source = 0
-                            self.get_neighbors(square)
-                            self.__start = square
-                            print(self.__start)
-                            print(square.neighbors)
-                            break
-                    # Post the start square to the view observer of model
-                    self.__event_manager.post(TickEvent("start", self.__start))
+                    if not self.__start:
+                        for square in self.__squares.values():
+                            if square.coordinate_in_square(clickpos[0], clickpos[1]):
+                                # set the square to be the start square Now that we have picked a start square, we have to
+                                # prevent the user from picking another start
+                                # TODO: consider adding a new state to prevent
+                                #  this from happening? Only allowing end square input
+                                square.square_type = SquareType.START
+                                square.distance_from_source = 0
+                                self.get_neighbors(square)
+                                self.__start = square
+                                print(self.__start)
+                                print(square.neighbors)
+                                break
+                        # Post the start square to the view observer of model
+                        self.__event_manager.post(TickEvent("start", self.__start))
+                    else:
+                        for square in self.__squares.values():
+                            if square.coordinate_in_square(clickpos[0], clickpos[1]):
+                                square.square_type = SquareType.WALL
+                                break
+                        self.__event_manager.post(TickEvent())
+
                 elif event.char == "right_click":
                     # Post the end square to the view observer of model
                     print("right click in model")
