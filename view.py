@@ -51,11 +51,11 @@ class GraphicalView(object):
             current_state = self.model.state.peek()
 
             if current_state == model.StateType.SELECTION:
-                self.render_grid(event)
+                self.render_all()
             if current_state == model.StateType.RUNNING:
-                self.render_grid(event)
+                self.render_all()
             if current_state == model.StateType.PAUSED:
-                self.render_pause()
+                self.render_all()
 
             # limit the redraw speed to 30 frames per second
             self.clock.tick(30)
@@ -96,63 +96,26 @@ class GraphicalView(object):
         self.screen.blit(some_words, (0, 0))
         pygame.display.flip()
 
-    # Draw each of the squares on the screen
-    # In reality, this is the only draw method that we need
-    def render_grid(self, event=None):
+    # def init_grid(self):
+    #     for x in range(0, model.WIDTH, 20):
+    #         for y in range(0, model.HEIGHT, 20):
+    #             pygame.draw.rect(self.screen, GRAY, (x, y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
 
-        # self.screen.fill(WHITE)
+    # Only one draw method is needed
+    # This draw method draws all of the squares on the screen
+    # Potentially in the future when running dijkstra a second draw method and/or events may be required
+    def render_all(self, event=None):
+        # self.init_grid()
 
-        # The number of squares is: (WIDTH / square width/height) * (HEIGHT / square width/height)
-        # Use this information to generate each of the squares
-        # for x in range(0, model.WIDTH, 20):
-        #     for y in range(0, model.HEIGHT, 20):
-        #         pygame.draw.rect(self.screen, GRAY, (x, y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
-        self.init_grid()
+        for square in self.model.squares:
+            if square.square_type is model.SquareType.NORMAL:
+                pygame.draw.rect(self.screen, GRAY, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
+            elif square.square_type is model.SquareType.START:
+                pygame.draw.rect(self.screen, GREEN, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+            elif square.square_type is model.SquareType.END:
+                pygame.draw.rect(self.screen, RED, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
 
-        if event:
-            name = event.name
-
-            if name == "start":
-                start_square = event.state
-                pygame.draw.rect(self.screen, GREEN, (start_square.x, start_square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
-            elif name == "end":
-                end_square = event.state
-                pygame.draw.rect(self.screen, RED, (end_square.x, end_square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
-            else:
-                pass
-
-            # for square in squares:
-            #     if square.square_type is model.SquareType.NORMAL:
-            #         pygame.draw.rect(self.screen, GRAY, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
-            #     elif square.square_type is model.SquareType.START:
-            #         pygame.draw.rect(self.screen, GREEN, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
-            #     elif square.square_type is model.SquareType.END:
-            #         pygame.draw.rect(self.screen, RED, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
-        # if event.state:
-        #     state = event.state
-        #     # Tick events will either be one square (start/end) or all of the squares on the grid
-        #     if event.name == "start":
-        #         pygame.draw.rect(self.screen, GREEN, (state.x, state.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
-        #     elif event.name == "end":
-        #         print("End needs to be drawn")
-        #         pygame.draw.rect(self.screen, RED, (state.x, state.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
         pygame.display.flip()
-
-    def init_grid(self):
-        for x in range(0, model.WIDTH, 20):
-            for y in range(0, model.HEIGHT, 20):
-                pygame.draw.rect(self.screen, GRAY, (x, y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
-
-    def render_selection(self, event=None):
-        if event.state:
-            state = event.state
-            # Tick events will either be one square (start/end) or all of the squares on the grid
-            if event.name == "start":
-                pygame.draw.rect(self.screen, GREEN, (state.x, state.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
-            elif event.name == "end":
-                print("End needs to be drawn")
-                pygame.draw.rect(self.screen, RED, (state.x, state.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
-            pygame.display.flip()
 
     def initialize(self):
         """
@@ -167,4 +130,4 @@ class GraphicalView(object):
         self.small_font = pygame.font.Font(None, 40)
         self.is_initialized = True
         self.screen.fill(WHITE)
-        self.init_grid()
+        self.render_all()

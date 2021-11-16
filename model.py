@@ -32,9 +32,10 @@ class Square:
 
     def get_neighbors(self):
         # # upper bound in range is exclusive not inclusive
-        for i in range(self.__x - 1, self.__x + 2):
-            for j in range(self.__y - 1, self.__y + 2):
-                if (i, j) != (self.__x, self.__y) and (0 <= i < WIDTH and 0 < j < HEIGHT):
+        for i in range(self.__x - SQUARE_SIZE, self.__x + (SQUARE_SIZE * 2), SQUARE_SIZE):
+            for j in range(self.__y - SQUARE_SIZE, self.__y + (SQUARE_SIZE * 2), SQUARE_SIZE):
+                print(f"({i}, {j})")
+                if (i, j) != (self.__x, self.__y) and (0 <= i < WIDTH and 0 <= j < HEIGHT):
                     self.__neighbors.append((i, j))
 
     @property
@@ -138,8 +139,10 @@ class Model:
                             # TODO: consider adding a new state to prevent
                             #  this from happening? Only allowing end square input
                             square.square_type = SquareType.START
+                            square.get_neighbors()
                             self.__start = square
                             print(self.__start)
+                            print(square.neighbors)
                             break
                     # Post the start square to the view observer of model
                     self.__event_manager.post(TickEvent("start", self.__start))
@@ -149,8 +152,10 @@ class Model:
                     for square in self.__squares:
                         if square.coordinate_in_square(clickpos[0], clickpos[1]):
                             square.square_type = SquareType.END
+                            square.get_neighbors()
                             self.__end = square
                             print(self.__end)
+                            print(square.neighbors)
                             break
                     self.__event_manager.post(TickEvent("end", self.__end))
 
@@ -211,6 +216,14 @@ class Model:
     @end.setter
     def end(self, value):
         self.__end = value
+
+    @property
+    def squares(self):
+        return self.__squares
+
+    @squares.setter
+    def squares(self, value):
+        self.__squares = value
 
 
 class StateType(Enum):
