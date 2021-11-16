@@ -108,7 +108,8 @@ class Model:
         for i in range(square.x - SQUARE_SIZE, square.x + (SQUARE_SIZE * 2), SQUARE_SIZE):
             for j in range(square.y - SQUARE_SIZE, square.y + (SQUARE_SIZE * 2), SQUARE_SIZE):
                 # print(f"({i}, {j})")
-                if (i, j) != (square.x, square.y) and (0 <= i < WIDTH and 0 <= j < HEIGHT) and self.__squares[(i,j)].square_type is not SquareType.WALL:
+                if (i, j) != (square.x, square.y) and (0 <= i < WIDTH and 0 <= j < HEIGHT) and self.__squares[
+                    (i, j)].square_type is not SquareType.WALL:
                     square.neighbors.append(self.__squares[(i, j)])
 
         return square.neighbors
@@ -214,6 +215,7 @@ class Model:
                         v.pred = u
                         if v.square_type is not SquareType.END:
                             v.square_type = SquareType.DONE
+
                         pq[v] = v.distance_from_source
 
                     # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
