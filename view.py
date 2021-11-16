@@ -63,7 +63,7 @@ class GraphicalView(object):
                 self.render_path()
 
             # limit the redraw speed to 30 frames per second
-            self.clock.tick(30)
+            self.clock.tick(60)
 
     # def render_selection(self):
     #     """
