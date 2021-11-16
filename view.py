@@ -59,7 +59,7 @@ class GraphicalView(object):
                 self.render_all()
             if current_state == model.StateType.ENDED:
                 print("Algorithm ended")
-                self.render_all()
+                self.render_all(event)
 
             # limit the redraw speed to 30 frames per second
             self.clock.tick(30)
@@ -120,6 +120,9 @@ class GraphicalView(object):
                 pygame.draw.rect(self.screen, RED, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
             elif square.square_type is model.SquareType.DONE:
                 pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
+
+        if event:
+            print(event.state)
 
         pygame.display.flip()
 

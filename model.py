@@ -101,6 +101,7 @@ class Model:
         self.__event_manager.register_listener(self)
         self.__running = False
         self.state = StateMachine()
+        self.shortest_path = []
 
     def get_neighbors(self, square):
         # # upper bound in range is exclusive not inclusive
@@ -181,6 +182,9 @@ class Model:
             elif self.state.peek() == StateType.SELECTION:
                 new_tick = TickEvent(self.__squares)
                 self.__event_manager.post(new_tick)
+            elif self.state.peek() == StateType.ENDED:
+                new_tick = TickEvent(self.shortest_path)
+                self.__event_manager.post(new_tick)
 
     def dijkstra(self):
         pq = heapdict()
@@ -212,13 +216,12 @@ class Model:
                 if v == self.__end or v.square_type is SquareType.END:
                     # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
                     #  event
-                    shortest_path = self.get_shortest_path()
-                    for square in shortest_path:
-                        print(square)
+                    self.shortest_path = self.get_shortest_path(v)
+                    print(self.shortest_path)
                     self.__event_manager.post(StateChangeEvent(StateType.ENDED))
                     return v
 
-    def get_shortest_path(self):
+    def get_shortest_path(self, square):
         current_square = self.__end
         path = []
 
