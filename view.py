@@ -46,7 +46,7 @@ class GraphicalView(object):
             current_state = self.model.state.peek()
 
             if current_state == model.StateType.SELECTION:
-                self.render_grid()
+                self.render_grid(event)
             if current_state == model.StateType.RUNNING:
                 self.render_grid()
             if current_state == model.StateType.PAUSED:
@@ -93,7 +93,8 @@ class GraphicalView(object):
 
     # Draw each of the squares on the screen
     # In reality, this is the only draw method that we need
-    def render_grid(self):
+    def render_grid(self, event=None):
+
         WHITE = (255, 255, 255)
         self.screen.fill(WHITE)
         GRAY = (128, 128, 128)
@@ -103,6 +104,13 @@ class GraphicalView(object):
         for x in range(0, model.WIDTH, 20):
             for y in range(0, model.HEIGHT, 20):
                 pygame.draw.rect(self.screen, GRAY, (x, y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
+
+        if event.state:
+            # Tick events will either be one square (start/end) or all of the squares on the grid
+            if event.name == "start":
+                print("Start needs to be drawn")
+            elif event.name == "end":
+                print("End needs to be drawn")
         pygame.display.flip()
 
     def initialize(self):

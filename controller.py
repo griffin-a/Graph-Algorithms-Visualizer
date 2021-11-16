@@ -57,12 +57,9 @@ class Keyboard(object):
     def handle_click(self, event):
         # Handle a left click
         if event.button == 1:
-            print("left click")
             self.__event_manager.post(InputEvent("left_click", pygame.mouse.get_pos()))
         if event.button == 3:
-            print("right click")
             self.__event_manager.post(InputEvent("right_click", pygame.mouse.get_pos()))
-
 
     def key_down_selection(self, event):
         """
