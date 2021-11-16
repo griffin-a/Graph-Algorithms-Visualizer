@@ -85,6 +85,10 @@ class Square:
     def neighbors(self, value):
         self.__neighbors = value
 
+    # Given an (x,y) coordinate, returns if the coordinate is within the square
+    def coordinate_in_square(self, x, y):
+        return self.__x <= x <= self.__x + SQUARE_SIZE and self.__y <= y <= self.__y + SQUARE_SIZE
+
 
 class Model:
     def __init__(self, event_manager):
@@ -116,6 +120,16 @@ class Model:
             else:
                 # push a new state on the stack
                 self.state.push(event.state)
+        if isinstance(event, InputEvent):
+            # We now need to determine which squares were clicked on to set start and end
+            clickpos = event.clickpos
+
+            if clickpos:
+                # Now we search all of the squares to see which square was clicked on
+                for square in self.__squares:
+                    if square.coordinate_in_square(clickpos[0], clickpos[1]):
+                        # set the square to be the start square
+                        break
 
     def run(self):
         """
