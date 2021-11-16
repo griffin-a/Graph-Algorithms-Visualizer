@@ -1,5 +1,6 @@
 from heapdict import heapdict
 from eventmanager import *
+
 """
 This class encapsulates all inner state of the visualizer. 
 This includes, application logic and the grid with all of its respective squares
@@ -8,7 +9,6 @@ This includes, application logic and the grid with all of its respective squares
 import math
 from collections import deque
 from enum import Enum
-
 
 WIDTH = HEIGHT = 600
 
@@ -96,6 +96,7 @@ class Model:
         self.__event_manager = event_manager
         self.__event_manager.register_listener(self)
         self.__running = False
+        self.__state = StateMachine()
 
     def notify(self, event):
         """
@@ -104,6 +105,15 @@ class Model:
 
         if isinstance(event, QuitEvent):
             self.__running = False
+        if isinstance(event, StateChangeEvent):
+            # pop request
+            if not event.state:
+                # false if no more states are left
+                if not self.__state.pop():
+                    self.__event_manager.Post(QuitEvent())
+            else:
+                # push a new state on the stdack
+                self.__state.push(event.state)
 
     def run(self):
         """
@@ -114,6 +124,7 @@ class Model:
         """
         self.__running = True
         self.__event_manager.post(InitializeEvent())
+        self.__state.push(StateType.SELECTION)
         while self.__running:
             # Run the algorithm, all the while, posting new events when appropriate
             self.dijkstra()
@@ -142,3 +153,49 @@ class Model:
                 if v == self.__end:
                     return v
 
+
+class StateType(Enum):
+    # The user has yet to select the start and end squares and press start
+    SELECTION = 1,
+    # The simulation is running
+    RUNNING = 2,
+    # The simulation is paused
+    PAUSED = 3,
+    # The simulation has ended
+    ENDED = 4
+
+
+class StateMachine:
+    def __init__(self):
+        self.__state_stack = []
+
+    def peek(self):
+        """
+        Returns the current state without altering the stack.
+        Returns None if the stack is empty.
+        """
+        try:
+            return self.__state_stack[-1]
+        except IndexError:
+            # empty stack
+            return None
+
+    def pop(self):
+        """
+        Returns the current state and remove it from the stack.
+        Returns None if the stack is empty.
+        """
+        try:
+            self.__state_stack.pop()
+            return len(self.__state_stack) > 0
+        except IndexError:
+            # empty stack
+            return None
+
+    def push(self, state):
+        """
+        Push a new state onto the stack.
+        Returns the pushed value.
+        """
+        self.__state_stack.append(state)
+        return state

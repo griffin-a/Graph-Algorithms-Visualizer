@@ -40,32 +40,56 @@ class GraphicalView(object):
             self.is_initialized = False
             pygame.quit()
         elif isinstance(event, TickEvent):
-            self.render_all(event)
+            if not self.is_initialized:
+                return
+            # Get the current state
+            current_state = self.model.state.peek()
+
+            if current_state == model.StateType.SELECTION:
+                self.render_selection()
+            if current_state == model.StateType.RUNNING:
+                self.render_run()
+            if current_state == model.StateType.PAUSED:
+                self.render_pause()
+
             # limit the redraw speed to 30 frames per second
             self.clock.tick(30)
 
-    def render_all(self, render_info=None):
+    def render_selection(self):
         """
-        Draw the current game state on screen.
-        Does nothing if is_initialized == False (pygame.init failed)
+        Render the game menu.
         """
 
-        if not self.is_initialized:
-            return
-        # # clear display
-        # self.screen.fill((0, 0, 0))
-        # # draw some words on the screen
-        # some_words = self.small_font.render(
-        #     'The View is busy drawing on your screen',
-        #     True,
-        #     (0, 255, 0))
-        # self.screen.blit(some_words, (0, 0))
-        # # flip the display to show whatever we drew
-        # pygame.display.flip()
+        self.screen.fill((0, 0, 0))
+        some_words = self.small_font.render(
+            'You are in the selection screen. Space to play. Esc exits.',
+            True, (0, 255, 0))
+        self.screen.blit(some_words, (0, 0))
+        pygame.display.flip()
 
-        # First clear the display
-        # Now we need to call draw_grid
-        # After the grid has been drawn, we need to draw the squares on the grid
+    def render_run(self):
+        """
+        Render the game play.
+        """
+
+        self.screen.fill((0, 0, 0))
+        some_words = self.small_font.render(
+            'You are Playing the game. F1 for help.',
+            True, (0, 255, 0))
+        self.screen.blit(some_words, (0, 0))
+        pygame.display.flip()
+
+    def render_pause(self):
+        """
+        Render the help screen.
+        """
+
+        self.screen.fill((0, 0, 0))
+        some_words = self.small_font.render(
+            'You have paused. space, escape or return.',
+            True, (0, 255, 0))
+        self.screen.blit(some_words, (0, 0))
+        pygame.display.flip()
 
     def initialize(self):
         """
