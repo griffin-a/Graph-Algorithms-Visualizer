@@ -88,10 +88,10 @@ class Square:
 
 class Model:
     def __init__(self, event_manager):
-        # All of type Square
-        # When we first initialize the model, we want to set the initial state of all of the squares
-        # We want to create a square for each position in the grid
-        # TODO: See if we need to alter each square's x,y coordinates to make each square at a distance of 1 from each other
+        # All of type Square When we first initialize the model, we want to set the initial state of all of the
+        # squares We want to create a square for each position in the grid
+        # TODO: See if we need to alter each
+        #  square's x,y coordinates to make each square at a distance of 1 from each other
         self.__squares = [Square(x, y) for x in range(0, WIDTH, SQUARE_SIZE) for y in range(0, HEIGHT, SQUARE_SIZE)]
         self.__start = None
         self.__end = None
@@ -132,7 +132,7 @@ class Model:
                 # Run the algorithm, all the while, posting new events when appropriate
                 self.dijkstra()
             elif self.state.peek() == StateType.SELECTION:
-                new_tick = TickEvent()
+                new_tick = TickEvent(self.__squares)
                 self.__event_manager.post(new_tick)
 
     def dijkstra(self):
@@ -158,6 +158,22 @@ class Model:
 
                 if v == self.__end:
                     return v
+
+    @property
+    def start(self):
+        return self.__start
+
+    @start.setter
+    def start(self, value):
+        self.__start = value
+
+    @property
+    def end(self):
+        return self.__end
+
+    @end.setter
+    def end(self, value):
+        self.__end = value
 
 
 class StateType(Enum):

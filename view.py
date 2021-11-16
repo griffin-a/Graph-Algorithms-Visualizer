@@ -91,6 +91,8 @@ class GraphicalView(object):
         self.screen.blit(some_words, (0, 0))
         pygame.display.flip()
 
+    # Draw each of the squares on the screen
+    # In reality, this is the only draw method that we need
     def render_grid(self):
         WHITE = (255, 255, 255)
         self.screen.fill(WHITE)

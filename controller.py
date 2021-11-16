@@ -44,6 +44,18 @@ class Keyboard(object):
                         #     self.keydownhelp(event)
                         if current_state == model.StateType.PAUSED:
                             self.key_down_pause(event)
+                # Left mouse button has been pressed
+                if event.type == pygame.MOUSEBUTTONUP:
+                    current_state = self.__model.state.peek()
+
+                    # We only want to allow mouse clicks during selection
+                    if current_state == model.StateType.SELECTION:
+                        self.handle_left_click(event)
+
+    def handle_left_click(self, event):
+        # Handle a left click
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.__event_manager.post(InputEvent(None, pygame.mouse.get_pos()))
 
     def key_down_selection(self, event):
         """
@@ -52,7 +64,7 @@ class Keyboard(object):
 
         # escape pops the menu
         if event.key == pygame.K_ESCAPE:
-            self.__event_manager.Post(StateChangeEvent(None))
+            self.__event_manager.post(StateChangeEvent(None))
         # space plays the game
         # TODO: Only let state change to running occur once the user has picked the start and end nodes
         if event.key == pygame.K_SPACE:
