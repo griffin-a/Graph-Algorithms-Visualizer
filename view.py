@@ -53,7 +53,7 @@ class GraphicalView(object):
             if current_state == model.StateType.SELECTION:
                 self.render_grid(event)
             if current_state == model.StateType.RUNNING:
-                self.render_grid()
+                self.render_grid(event)
             if current_state == model.StateType.PAUSED:
                 self.render_pause()
 
