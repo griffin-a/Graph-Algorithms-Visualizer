@@ -2,6 +2,7 @@ import pygame
 import model
 from eventmanager import *
 
+
 class GraphicalView(object):
     """
     Draws the model state onto the screen.
@@ -99,7 +100,7 @@ class GraphicalView(object):
         # Use this information to generate each of the squares
         for x in range(0, model.WIDTH, 20):
             for y in range(0, model.HEIGHT, 20):
-                pygame.draw.rect(self.screen, GRAY, (x, y, 20, 20), 3)
+                pygame.draw.rect(self.screen, GRAY, (x, y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
         pygame.display.flip()
 
     def initialize(self):

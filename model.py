@@ -11,6 +11,7 @@ from collections import deque
 from enum import Enum
 
 WIDTH = HEIGHT = 600
+SQUARE_SIZE = 20
 
 
 class SquareType(Enum):
@@ -90,7 +91,8 @@ class Model:
         # All of type Square
         # When we first initialize the model, we want to set the initial state of all of the squares
         # We want to create a square for each position in the grid
-        self.__squares = [Square(x, y) for x in range(WIDTH) for y in range(HEIGHT)]
+        # TODO: See if we need to alter each square's x,y coordinates to make each square at a distance of 1 from each other
+        self.__squares = [Square(x, y) for x in range(0, WIDTH, SQUARE_SIZE) for y in range(0, HEIGHT, SQUARE_SIZE)]
         self.__start = None
         self.__end = None
         self.__event_manager = event_manager
