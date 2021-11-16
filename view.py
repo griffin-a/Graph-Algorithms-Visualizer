@@ -107,18 +107,27 @@ class GraphicalView(object):
         # for x in range(0, model.WIDTH, 20):
         #     for y in range(0, model.HEIGHT, 20):
         #         pygame.draw.rect(self.screen, GRAY, (x, y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
+        self.init_grid()
 
-        if event.state:
-            squares = event.state
-            print(len(squares))
+        if event:
+            name = event.name
 
-            for square in squares:
-                if square.square_type is model.SquareType.NORMAL:
-                    pygame.draw.rect(self.screen, GRAY, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
-                elif square.square_type is model.SquareType.START:
-                    pygame.draw.rect(self.screen, GREEN, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
-                elif square.square_type is model.SquareType.END:
-                    pygame.draw.rect(self.screen, RED, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+            if name == "start":
+                start_square = event.state
+                pygame.draw.rect(self.screen, GREEN, (start_square.x, start_square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+            elif name == "end":
+                end_square = event.state
+                pygame.draw.rect(self.screen, RED, (end_square.x, end_square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+            else:
+                pass
+
+            # for square in squares:
+            #     if square.square_type is model.SquareType.NORMAL:
+            #         pygame.draw.rect(self.screen, GRAY, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE), 3)
+            #     elif square.square_type is model.SquareType.START:
+            #         pygame.draw.rect(self.screen, GREEN, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+            #     elif square.square_type is model.SquareType.END:
+            #         pygame.draw.rect(self.screen, RED, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
         # if event.state:
         #     state = event.state
         #     # Tick events will either be one square (start/end) or all of the squares on the grid

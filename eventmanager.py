@@ -25,6 +25,8 @@ class TickEvent(Event):
     """
     Tick event.
     """
+    # Tick event will either just contain a chosen start/end square or it will contain all of the squares that have
+    # been updated by the algorithm
     # TODO: Add information that encapsulates changes to the underlying game structure
     def __init__(self, name="Tick event", state=None):
         super().__init__()
