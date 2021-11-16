@@ -21,7 +21,7 @@ class GraphicalView(object):
         """
 
         self.__event_manager = event_manager
-        self.__event_manager.RegisterListener(self)
+        self.__event_manager.register_listener(self)
         self.model = model
         self.is_initialized = False
         self.screen = None

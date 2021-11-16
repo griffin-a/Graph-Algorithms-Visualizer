@@ -14,7 +14,7 @@ class Keyboard(object):
         model (GameEngine): a strong reference to the game Model.
         """
         self.__event_manager = event_manager
-        self.__event_manager.RegisterListener(self)
+        self.__event_manager.register_listener(self)
         self.__model = model
 
     def notify(self, event):
