@@ -175,7 +175,7 @@ class Model:
         self.__event_manager.post(InitializeEvent())
         self.state.push(StateType.SELECTION)
         while self.__running:
-            if self.state.peek() == StateType.RUNNING:
+            if self.state.peek() == StateType.RUNNING and not self.state.peek() == StateType.ENDED:
                 # Run the algorithm, all the while, posting new events when appropriate
                 self.dijkstra()
             elif self.state.peek() == StateType.SELECTION:
@@ -209,7 +209,7 @@ class Model:
                     self.__event_manager.post(new_tick)
 
                 if v == self.__end or v.square_type is SquareType.END:
-                    self.__event_manager.post(StateChangeEvent())
+                    self.__event_manager.post(StateChangeEvent(StateType.ENDED))
                     return v
 
     @property

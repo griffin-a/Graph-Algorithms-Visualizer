@@ -6,6 +6,7 @@ WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+ORANGE = (255,165,0)
 
 
 class GraphicalView(object):
@@ -55,6 +56,9 @@ class GraphicalView(object):
             if current_state == model.StateType.RUNNING:
                 self.render_all()
             if current_state == model.StateType.PAUSED:
+                self.render_all()
+            if current_state == model.StateType.ENDED:
+                print("Algorithm ended")
                 self.render_all()
 
             # limit the redraw speed to 30 frames per second
@@ -114,6 +118,8 @@ class GraphicalView(object):
                 pygame.draw.rect(self.screen, GREEN, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
             elif square.square_type is model.SquareType.END:
                 pygame.draw.rect(self.screen, RED, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
+            elif square.square_type is model.SquareType.DONE:
+                pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, model.SQUARE_SIZE, model.SQUARE_SIZE))
 
         pygame.display.flip()
 
