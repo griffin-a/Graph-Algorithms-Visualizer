@@ -134,7 +134,7 @@ class Model:
                     v.pred = u
                     pq[v] = v.distance_from_source
 
-                # Tick update here: one iteration of the algorithm has finished, we now need to update
+                # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
 
                 if v == self.__end:
                     return v
