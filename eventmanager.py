@@ -36,7 +36,7 @@ class InputEvent(Event):
     """
     Keyboard or mouse input event.
     """
-
+    # Potentially use the unicodechar as a way to distinguish between input events?
     def __init__(self, unicodechar=None, clickpos=None):
         super().__init__()
         self.name = "Input event"

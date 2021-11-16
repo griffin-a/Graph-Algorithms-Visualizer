@@ -44,18 +44,25 @@ class Keyboard(object):
                         #     self.keydownhelp(event)
                         if current_state == model.StateType.PAUSED:
                             self.key_down_pause(event)
-                # Left mouse button has been pressed
+                # Mouse has been clicked
+                # TODO: What is the difference between MOUSEBUTTONUP and MOUSEBUTTONDOWN?
                 if event.type == pygame.MOUSEBUTTONUP:
+                    # print(event.button)
                     current_state = self.__model.state.peek()
 
                     # We only want to allow mouse clicks during selection
                     if current_state == model.StateType.SELECTION:
-                        self.handle_left_click(event)
+                        self.handle_click(event)
 
-    def handle_left_click(self, event):
+    def handle_click(self, event):
         # Handle a left click
-        if event.type == pygame.MOUSEBUTTONUP:
-            self.__event_manager.post(InputEvent(None, pygame.mouse.get_pos()))
+        if event.button == 1:
+            print("left click")
+            self.__event_manager.post(InputEvent("left_click", pygame.mouse.get_pos()))
+        if event.button == 3:
+            print("right click")
+            self.__event_manager.post(InputEvent("right_click", pygame.mouse.get_pos()))
+
 
     def key_down_selection(self, event):
         """
