@@ -104,15 +104,30 @@ class Model:
         self.shortest_path = []
 
     def get_neighbors(self, square):
-        # # upper bound in range is exclusive not inclusive
-        for i in range(square.x - SQUARE_SIZE, square.x + (SQUARE_SIZE * 2), SQUARE_SIZE):
-            for j in range(square.y - SQUARE_SIZE, square.y + (SQUARE_SIZE * 2), SQUARE_SIZE):
-                # print(f"({i}, {j})")
-                if (i, j) != (square.x, square.y) and (0 <= i < WIDTH and 0 <= j < HEIGHT) and self.__squares[
-                    (i, j)].square_type is not SquareType.WALL:
-                    square.neighbors.append(self.__squares[(i, j)])
+        if square.y - SQUARE_SIZE >= 0:
+            square.neighbors.append(self.__squares[(square.x, square.y - SQUARE_SIZE)])
+        if square.x - SQUARE_SIZE >= 0:
+            square.neighbors.append(self.__squares[(square.x - SQUARE_SIZE, square.y)])
+        if square.x + SQUARE_SIZE < WIDTH:
+            square.neighbors.append(self.__squares[(square.x + SQUARE_SIZE, square.y)])
+        if square.y + SQUARE_SIZE < HEIGHT:
+            square.neighbors.append(self.__squares[(square.x, square.y + SQUARE_SIZE)])
 
         return square.neighbors
+
+        # def get_neighbors(self, square):
+        #     # # upper bound in range is exclusive not inclusive
+        #     for i in range(square.x - SQUARE_SIZE, square.x + (SQUARE_SIZE * 2), SQUARE_SIZE):
+        #         for j in range(square.y - SQUARE_SIZE, square.y + (SQUARE_SIZE * 2), SQUARE_SIZE):
+        #             # print(f"({i}, {j})")
+        #             # If we have a neighbor that is a wall, we can save all of the neighbors in a cross direction
+        #             # using these neighbors, we can then prevent them from being added to  square.neighbors
+        #
+        #             if (i, j) != (square.x, square.y) and (0 <= i < WIDTH and 0 <= j < HEIGHT):
+        #                 # Don't add neighbors that are wall neighbors
+        #                 square.neighbors.append(self.__squares[(i, j)])
+        #
+        #     return square.neighbors
 
     def notify(self, event):
         """
@@ -141,10 +156,10 @@ class Model:
                     if not self.__start:
                         for square in self.__squares.values():
                             if square.coordinate_in_square(clickpos[0], clickpos[1]):
-                                # set the square to be the start square Now that we have picked a start square, we have to
-                                # prevent the user from picking another start
-                                # TODO: consider adding a new state to prevent
-                                #  this from happening? Only allowing end square input
+                                # set the square to be the start square Now that we have picked a start square,
+                                # we have to prevent the user from picking another start
+                                # TODO: consider adding a new
+                                #  state to prevent this from happening? Only allowing end square input
                                 square.square_type = SquareType.START
                                 square.distance_from_source = 0
                                 self.get_neighbors(square)
@@ -202,10 +217,10 @@ class Model:
         while pq:
             # A tuple is returned, where the fist item is the square and the second value is the priority
             u = pq.popitem()[0]
-            print(f"u: {u}")
+            # print(f"u: {u}")
 
             for v in self.get_neighbors(u):
-                print(f"v: {v}")
+                # print(f"v: {v}")
 
                 if v.square_type is SquareType.NORMAL or v.square_type is SquareType.END:
                     cost = math.dist((u.x, u.y), (v.x, v.y))
