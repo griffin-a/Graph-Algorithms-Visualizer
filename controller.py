@@ -54,6 +54,11 @@ class Keyboard(object):
                     if current_state == model.StateType.SELECTION:
                         self.handle_click(event)
 
+                # if event.type == pygame.MOUSEBUTTONDOWN:
+                #     current_state = self.__model.state.peek()
+                #     if current_state == model.StateType.SELECTION:
+                #         self.handle_click(event)
+
     def handle_click(self, event):
         # Handle a left click
         if event.button == 1:
