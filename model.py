@@ -1,4 +1,6 @@
 from heapdict import heapdict
+from mazelib import Maze
+
 from eventmanager import *
 
 """
@@ -10,7 +12,7 @@ import math
 from collections import deque
 from enum import Enum
 
-WIDTH = HEIGHT = 600
+WIDTH = HEIGHT = 100
 SQUARE_SIZE = 20
 
 
@@ -129,6 +131,48 @@ class Model:
         #
         #     return square.neighbors
 
+    # Using randomized DFS to generate a maze
+    def generate_maze(self):
+        import random
+        # Initialize all squares to walls
+        for square in self.__squares:
+            square.square_type = SquareType.WALL
+
+        stack = []
+
+        # Pick a random node to make normal
+        rand_x, rand_y = random.randrange(0, WIDTH), random.randrange(0, HEIGHT)
+        rand_square = self.__squares[(rand_x, rand_y)]
+        rand_square.square_type = SquareType.NORMAL
+
+        stack.append(rand_square)
+
+        while stack:
+            current = stack.pop()
+
+            direction_choice = random.randrange(0, 4)
+
+            neighbors = [self.__squares[(current.x - (2 * SQUARE_SIZE)), current.y],
+                         self.__squares[(current.x + (2 * SQUARE_SIZE)), current.y],
+                         self.__squares[(current.x, current.y + (2 * SQUARE_SIZE))],
+                         self.__squares[(current.x, current.y - (2 * SQUARE_SIZE))]]
+
+            while 0 <= neighbors[direction_choice].x < WIDTH and 0 <= neighbors[direction_choice].y < HEIGHT \
+                    and neighbors[direction_choice].square_type is not SquareType.WALL:
+                direction_choice = random.randrange(0, 4)
+
+            chosen_neighbor = neighbors[direction_choice]
+            chosen_neighbor.square_type = SquareType.NORMAL
+
+            # find the midpoint between the current square and chosen neighbor
+            midpoint = ((current.x + chosen_neighbor.x) // 2, (current.y + chosen_neighbor.y) // 2)
+            midpoint_square = self.__squares[midpoint]
+            midpoint_square.square_type = SquareType.NORMAL
+
+            stack.append(midpoint_square)
+
+
+
     def notify(self, event):
         """
         Called by an event in the message queue.
@@ -145,49 +189,54 @@ class Model:
             else:
                 # push a new state on the stack
                 self.state.push(event.state)
+
         if isinstance(event, InputEvent):
             # We now need to determine which squares were clicked on to set start and end
-            clickpos = event.clickpos
+            if event.char == "maze":
+                self.generate_maze()
+                self.__event_manager.post(TickEvent())
+            elif event.char == "left_click" or event.char == "right_click":
+                clickpos = event.clickpos
 
-            if clickpos:
-                # Setting the start here
-                if event.char == "left_click":
-                    # Now we search all of the squares to see which square was clicked on
-                    if not self.__start:
+                if clickpos:
+                    # Setting the start here
+                    if event.char == "left_click":
+                        # Now we search all of the squares to see which square was clicked on
+                        if not self.__start:
+                            for square in self.__squares.values():
+                                if square.coordinate_in_square(clickpos[0], clickpos[1]):
+                                    # set the square to be the start square Now that we have picked a start square,
+                                    # we have to prevent the user from picking another start
+                                    # TODO: consider adding a new
+                                    #  state to prevent this from happening? Only allowing end square input
+                                    square.square_type = SquareType.START
+                                    square.distance_from_source = 0
+                                    self.get_neighbors(square)
+                                    self.__start = square
+                                    print(self.__start)
+                                    print(square.neighbors)
+                                    break
+                            # Post the start square to the view observer of model
+                            self.__event_manager.post(TickEvent("start", self.__start))
+                        else:
+                            for square in self.__squares.values():
+                                if square.coordinate_in_square(clickpos[0], clickpos[1]):
+                                    square.square_type = SquareType.WALL
+                                    break
+                            self.__event_manager.post(TickEvent())
+
+                    elif event.char == "right_click":
+                        # Post the end square to the view observer of model
+                        print("right click in model")
                         for square in self.__squares.values():
                             if square.coordinate_in_square(clickpos[0], clickpos[1]):
-                                # set the square to be the start square Now that we have picked a start square,
-                                # we have to prevent the user from picking another start
-                                # TODO: consider adding a new
-                                #  state to prevent this from happening? Only allowing end square input
-                                square.square_type = SquareType.START
-                                square.distance_from_source = 0
+                                square.square_type = SquareType.END
                                 self.get_neighbors(square)
-                                self.__start = square
-                                print(self.__start)
+                                self.__end = square
+                                print(self.__end)
                                 print(square.neighbors)
                                 break
-                        # Post the start square to the view observer of model
-                        self.__event_manager.post(TickEvent("start", self.__start))
-                    else:
-                        for square in self.__squares.values():
-                            if square.coordinate_in_square(clickpos[0], clickpos[1]):
-                                square.square_type = SquareType.WALL
-                                break
-                        self.__event_manager.post(TickEvent())
-
-                elif event.char == "right_click":
-                    # Post the end square to the view observer of model
-                    print("right click in model")
-                    for square in self.__squares.values():
-                        if square.coordinate_in_square(clickpos[0], clickpos[1]):
-                            square.square_type = SquareType.END
-                            self.get_neighbors(square)
-                            self.__end = square
-                            print(self.__end)
-                            print(square.neighbors)
-                            break
-                    self.__event_manager.post(TickEvent("end", self.__end))
+                        self.__event_manager.post(TickEvent("end", self.__end))
 
     def run(self):
         """

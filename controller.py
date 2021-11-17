@@ -81,6 +81,8 @@ class Keyboard(object):
         # escape pops the menu
         if event.key == pygame.K_ESCAPE:
             self.__event_manager.post(StateChangeEvent(None))
+        if event.key == pygame.K_g:
+            self.__event_manager.post(InputEvent("maze"))
         # space plays the game
         # TODO: Only let state change to running occur once the user has picked the start and end nodes
         if event.key == pygame.K_SPACE and self.__model.start and self.__model.end:
@@ -93,7 +95,7 @@ class Keyboard(object):
 
         # space, enter or escape pops help
         if event.key in [pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_RETURN]:
-            self.__event_manager.Post(StateChangeEvent(None))
+            self.__event_manager.post(StateChangeEvent(None))
 
     def key_down_run(self, event):
         """
@@ -101,9 +103,9 @@ class Keyboard(object):
         """
 
         if event.key == pygame.K_ESCAPE:
-            self.__event_manager.Post(StateChangeEvent(None))
+            self.__event_manager.post(StateChangeEvent(None))
         # F1 pauses the game
         if event.key == pygame.K_F1:
-            self.__event_manager.Post(StateChangeEvent(model.StateType.PAUSED))
+            self.__event_manager.post(StateChangeEvent(model.StateType.PAUSED))
         else:
-            self.__event_manager.Post(InputEvent(event.unicode, None))
+            self.__event_manager.post(InputEvent(event.unicode, None))
