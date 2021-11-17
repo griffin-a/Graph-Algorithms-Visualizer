@@ -12,7 +12,7 @@ import math
 from collections import deque
 from enum import Enum
 
-WIDTH = HEIGHT = 100
+WIDTH = HEIGHT = 600
 SQUARE_SIZE = 20
 
 
@@ -135,13 +135,17 @@ class Model:
     def generate_maze(self):
         import random
         # Initialize all squares to walls
-        for square in self.__squares:
+        for square in self.__squares.values():
             square.square_type = SquareType.WALL
 
         stack = []
 
         # Pick a random node to make normal
-        rand_x, rand_y = random.randrange(0, WIDTH), random.randrange(0, HEIGHT)
+        rand_x, rand_y = random.randrange(0, WIDTH - SQUARE_SIZE, SQUARE_SIZE), random.randrange(0,
+                                                                                                 HEIGHT - SQUARE_SIZE,
+                                                                                                 SQUARE_SIZE)
+        print(f"({rand_x}, {rand_y})")
+
         rand_square = self.__squares[(rand_x, rand_y)]
         rand_square.square_type = SquareType.NORMAL
 
@@ -152,16 +156,30 @@ class Model:
 
             direction_choice = random.randrange(0, 4)
 
-            neighbors = [self.__squares[(current.x - (2 * SQUARE_SIZE)), current.y],
-                         self.__squares[(current.x + (2 * SQUARE_SIZE)), current.y],
-                         self.__squares[(current.x, current.y + (2 * SQUARE_SIZE))],
-                         self.__squares[(current.x, current.y - (2 * SQUARE_SIZE))]]
+            neighbors = [(current.x - (2 * SQUARE_SIZE), current.y),
+                         (current.x + (2 * SQUARE_SIZE), current.y),
+                         (current.x, current.y + (2 * SQUARE_SIZE)),
+                         (current.x, current.y - (2 * SQUARE_SIZE))]
 
-            while 0 <= neighbors[direction_choice].x < WIDTH and 0 <= neighbors[direction_choice].y < HEIGHT \
-                    and neighbors[direction_choice].square_type is not SquareType.WALL:
-                direction_choice = random.randrange(0, 4)
+            flag = True
 
-            chosen_neighbor = neighbors[direction_choice]
+            while flag:
+                # if (neighbors[direction_choice][0] >= WIDTH or neighbors[direction_choice][0] < 0) \
+                # or (neighbors[direction_choice][1] >= HEIGHT or neighbors[direction_choice][1] < 0):
+                # In this case, we may have a valid neighbor
+                if 0 <= neighbors[direction_choice][0] < WIDTH and 0 <= neighbors[direction_choice][1] < HEIGHT:
+                    if self.__squares[neighbors[direction_choice]].square_type is SquareType.WALL:
+                        flag = False
+                    else:
+                        continue
+                else:
+                    direction_choice = random.randrange(0, 4)
+
+            # while 0 <= neighbors[direction_choice].x < WIDTH and 0 <= neighbors[direction_choice].y < HEIGHT \
+            #         and neighbors[direction_choice].square_type is not SquareType.WALL:
+            #     direction_choice = random.randrange(0, 4)
+
+            chosen_neighbor = self.__squares[neighbors[direction_choice]]
             chosen_neighbor.square_type = SquareType.NORMAL
 
             # find the midpoint between the current square and chosen neighbor
@@ -170,8 +188,6 @@ class Model:
             midpoint_square.square_type = SquareType.NORMAL
 
             stack.append(midpoint_square)
-
-
 
     def notify(self, event):
         """
