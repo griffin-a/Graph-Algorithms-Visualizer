@@ -28,6 +28,13 @@ class SquareType(Enum):
     DONE = 5
 
 
+class ClickOperation(Enum):
+    SET_START = 1,
+    SET_END = 2,
+    SET_WALL = 3
+    DELETE = 4
+
+
 class Square:
     def __init__(self, x, y, pred=-1, distance_from_source=float("inf"), square_type=SquareType.NORMAL):
         self.__x = x
@@ -105,6 +112,23 @@ class Model:
         self.__end = None
         self.__running = False
         self.shortest_path = []
+
+    def handle_click(self, click_pos, click_state, draw):
+        x, y = click_pos[0], click_pos[1]
+
+        for square in self.__squares.values():
+            if square.coordinate_in_square(x, y):
+                if click_state is ClickOperation.SET_START:
+                    square.square_type = SquareType.START
+                    self.__start = square
+                    draw()
+                elif click_state is ClickOperation.SET_END:
+                    square.square_type = SquareType.END
+                    self.__end = square
+                    draw()
+                elif click_state is ClickOperation.SET_WALL:
+                    square.square_type = SquareType.WALL
+                    draw()
 
     def get_neighbors(self, square):
         if square.y - SQUARE_SIZE >= 0:
@@ -342,7 +366,22 @@ class GraphicalView(object):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    click_pos = pygame.mouse.get_pos()
+                    x, y = click_pos[0], click_pos[1]
 
+                    # The user has left clicked
+                    if event.button == 1:
+                        # Check if the start has been set
+                        if not self.model.start:
+                            self.model.handle_click(click_pos, ClickOperation.SET_START, lambda: self.render_all())
+                        elif not self.model.end:
+                            self.model.handle_click(click_pos, ClickOperation.SET_END, lambda: self.render_all())
+                        else:
+                            self.model.handle_click(click_pos, ClickOperation.SET_WALL, lambda: self.render_all())
+                    # The user has right clicked
+                    # elif event.button == 3:
+                    #     self.model.handle_click(click_pos)
 
             # if current_state == model.StateType.SELECTION:
             #     self.render_all()
@@ -359,6 +398,22 @@ class GraphicalView(object):
 
         pygame.quit()
 
+    # def handle_click(self, click_pos, click_state, draw):
+    #     x, y = click_pos[0], click_pos[1]
+    #
+    #     for square in self.__squares.values():
+    #         if square.coordinate_in_square(x, y):
+    #             if click_state is ClickOperation.SET_START:
+    #                 square.square_type = SquareType.START
+    #                 self.__start = square
+    #                 draw()
+    #             elif click_state is ClickOperation.SET_END:
+    #                 square.square_type = SquareType.END
+    #                 self.__end = square
+    #                 draw()
+    #             elif click_state is ClickOperation.SET_WALL:
+    #                 square.square_type = SquareType.WALL
+    #                 draw()
 
 if __name__ == "__main__":
     m = Model()
