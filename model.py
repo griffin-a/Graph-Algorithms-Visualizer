@@ -1,5 +1,5 @@
 from heapdict import heapdict
-from mazelib import Maze
+import random
 
 from eventmanager import *
 
@@ -117,27 +117,48 @@ class Model:
 
         return square.neighbors
 
-        # def get_neighbors(self, square):
-        #     # # upper bound in range is exclusive not inclusive
-        #     for i in range(square.x - SQUARE_SIZE, square.x + (SQUARE_SIZE * 2), SQUARE_SIZE):
-        #         for j in range(square.y - SQUARE_SIZE, square.y + (SQUARE_SIZE * 2), SQUARE_SIZE):
-        #             # print(f"({i}, {j})")
-        #             # If we have a neighbor that is a wall, we can save all of the neighbors in a cross direction
-        #             # using these neighbors, we can then prevent them from being added to  square.neighbors
-        #
-        #             if (i, j) != (square.x, square.y) and (0 <= i < WIDTH and 0 <= j < HEIGHT):
-        #                 # Don't add neighbors that are wall neighbors
-        #                 square.neighbors.append(self.__squares[(i, j)])
-        #
-        #     return square.neighbors
+    # Go through all of the neighbors in each of the four cardinal directions from the current square
+    # Out of the valid neighbors (squares that don't lie outside of the bounds), randomly pick one and return it
+    def __get_maze_neighbor(self, square):
+        # direction_choice = random.randrange(0, 4)
+
+        # All of the possible neighbors
+        neighbors = [(square.x - (2 * SQUARE_SIZE), square.y),
+                     (square.x + (2 * SQUARE_SIZE), square.y),
+                     (square.x, square.y + (2 * SQUARE_SIZE)),
+                     (square.x, square.y - (2 * SQUARE_SIZE))]
+
+        # Remove any of the neighbors that either already visited or lie outside of bounds
+        for neighbor in neighbors:
+            print(neighbor)
+            x, y = neighbor[0], neighbor[1]
+
+            if x < 0 or x > (WIDTH - SQUARE_SIZE):
+                neighbors.remove(neighbor)
+                print(f"X out of bounds: {x}")
+            # We know that the coordinates are valid; now we check if the type is
+            if y < 0 or y > (HEIGHT - SQUARE_SIZE):
+                neighbors.remove(neighbor)
+                print(f"Y out of bounds: {y}")
+            # else:
+            #     neighbor_square = self.__squares[(x, y)]
+            #     if neighbor_square.square_type is not SquareType.WALL:
+            #         neighbors.remove(neighbor)
+
+        for neighbor in neighbors:
+            neighbor_square = self.__squares[neighbor]
+            if neighbor_square.square_type is not SquareType.WALL:
+                neighbors.remove(neighbor)
+
+        # print(neighbors)
+        # Out of the remaining valid neighbors, randomly select and return one
+        random_index = random.randrange(0, len(neighbors))
+        coordinates = neighbors[random_index]
+        # print(coordinates)
+        return self.__squares[coordinates]
 
     # Using randomized DFS to generate a maze
     def generate_maze(self):
-        import random
-
-        def get_neighbors():
-            pass
-
         # Initialize all squares to walls
         for square in self.__squares.values():
             square.square_type = SquareType.WALL
@@ -148,51 +169,32 @@ class Model:
         rand_x, rand_y = random.randrange(0, WIDTH - SQUARE_SIZE, SQUARE_SIZE), random.randrange(0,
                                                                                                  HEIGHT - SQUARE_SIZE,
                                                                                                  SQUARE_SIZE)
-        print(f"({rand_x}, {rand_y})")
 
         rand_square = self.__squares[(rand_x, rand_y)]
         rand_square.square_type = SquareType.NORMAL
 
+        # Append the first chosen node into the stack
         stack.append(rand_square)
+
         iteration = 0
 
         while stack:
             iteration += 1
-            print(iteration)
+            # print(iteration)
+
+            # Pop a node from the stack
             current = stack.pop()
-            print(current)
+            # print(current)
 
-            direction_choice = random.randrange(0, 4)
-
-            neighbors = [(current.x - (2 * SQUARE_SIZE), current.y),
-                         (current.x + (2 * SQUARE_SIZE), current.y),
-                         (current.x, current.y + (2 * SQUARE_SIZE)),
-                         (current.x, current.y - (2 * SQUARE_SIZE))]
-
-            iterations = 0
-            chosen_neighbor = None
-
-            while iterations < 4:
-
-                # if (neighbors[direction_choice][0] >= WIDTH or neighbors[direction_choice][0] < 0) \
-                # or (neighbors[direction_choice][1] >= HEIGHT or neighbors[direction_choice][1] < 0):
-                # In this case, we may have a valid neighbor
-                if 0 <= neighbors[direction_choice][0] < WIDTH and 0 <= neighbors[direction_choice][1] < HEIGHT:
-                    if self.__squares[neighbors[direction_choice]].square_type is SquareType.WALL:
-                        chosen_neighbor = self.__squares[neighbors[direction_choice][0], neighbors[direction_choice][1]]
-                        break
-                else:
-                    direction_choice = random.randrange(0, 4)
-                iterations += 1
-
-            # A neighbor hasn't been found
+            # Now we need to get an unvisited neighbor (if there are any)
+            chosen_neighbor = self.__get_maze_neighbor(current)
 
             if chosen_neighbor:
                 # while 0 <= neighbors[direction_choice].x < WIDTH and 0 <= neighbors[direction_choice].y < HEIGHT \
                 #         and neighbors[direction_choice].square_type is not SquareType.WALL:
                 #     direction_choice = random.randrange(0, 4)
 
-                print(chosen_neighbor)
+                # print(chosen_neighbor)
                 chosen_neighbor.square_type = SquareType.NORMAL
 
                 # find the midpoint between the current square and chosen neighbor
