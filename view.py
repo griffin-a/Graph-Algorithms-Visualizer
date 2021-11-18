@@ -303,6 +303,9 @@ class Model:
 
 
 class GraphicalView(object):
+    # TODO: Create a new method here that creates a new square based on click position
+    # Drawing will instead be handled on a square to square level rather than iterating the entire squares list
+    # Lambda functions will be used for this purpose to allow drawing to occur
     """
     Draws the model state onto the screen.
     """
