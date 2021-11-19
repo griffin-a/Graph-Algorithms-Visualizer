@@ -51,21 +51,21 @@ class Square(pygame.Rect):
     def distance_from_source(self, value):
         self.__distance_from_source = value
 
-    @property
-    def left(self):
-        return self.left
-
-    @left.setter
-    def left(self, value):
-        self.left = value
-
-    @property
-    def top(self):
-        return self.top
-
-    @top.setter
-    def top(self, value):
-        self.top = value
+    # @property
+    # def left(self):
+    #     return self.left
+    #
+    # @left.setter
+    # def left(self, value):
+    #     self.left = value
+    #
+    # @property
+    # def top(self):
+    #     return self.top
+    #
+    # @top.setter
+    # def top(self, value):
+    #     self.top = value
 
     @property
     def pred(self):
@@ -139,7 +139,6 @@ class Model:
                 elif click_state is ClickOperation.SET_WALL:
                     square.square_type = SquareType.WALL
                     # draw()
-        se
 
     def get_neighbors(self, square):
         if square.y - SQUARE_SIZE >= 0:
@@ -353,8 +352,8 @@ class GraphicalView(object):
         self.render_grid()
 
         for square in self.model.squares.values():
-            # if square.square_type is SquareType.NORMAL:
-            #     pygame.draw.rect(self.screen, GRAY, (square.left, square.top, SQUARE_SIZE, SQUARE_SIZE), 3)
+            if square.square_type is SquareType.NORMAL:
+                pygame.draw.rect(self.screen, GRAY, (square.left, square.top, SQUARE_SIZE, SQUARE_SIZE), 3)
             if square.square_type is SquareType.START:
                 pygame.draw.rect(self.screen, GREEN, (square.x, square.y, SQUARE_SIZE, SQUARE_SIZE))
             elif square.square_type is SquareType.END:
@@ -397,32 +396,34 @@ class GraphicalView(object):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
+
+                # The user has left clicked
+                if pygame.mouse.get_pressed()[0]:
                     click_pos = pygame.mouse.get_pos()
 
-                    # The user has left clicked
-                    if event.button == 1:
-                        row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
-                        # Check if the start has been set
-                        if not self.model.start:
-                            square = Square(row, col, -1, 0, SquareType.START)
-                            self.model.start = square
-                            self.model.squares[(row, col)] = square
+                    row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
+                    # Check if the start has been set
+                    if not self.model.start:
+                        square = Square(row, col, -1, 0, SquareType.START)
+                        self.model.start = square
+                        self.model.squares[(row, col)] = square
 
-                        elif not self.model.end:
-                            square = Square(row, col, -1, 0, SquareType.END)
+                    elif not self.model.end:
+                        square = Square(row, col, -1, 0, SquareType.END)
+                        if not square.colliderect(self.model.start):
                             self.model.end = square
                             self.model.squares[(row, col)] = square
 
-                        else:
-                            square = Square(row, col, -1, 0, SquareType.WALL)
+                    else:
+                        square = Square(row, col, -1, 0, SquareType.WALL)
+                        if not square.colliderect(self.model.start) and not square.colliderect(self.model.end):
                             self.model.squares[(row, col)] = square
 
-                    self.render_all()
-
                     # The user has right clicked
-                    # elif event.button == 3:
-                    #     self.model.handle_click(click_pos)
+                elif event.button == 3:
+                    self.model.handle_click(click_pos)
+            self.render_all()
+
 
             # if current_state == model.StateType.SELECTION:
             #     self.render_all()
@@ -434,8 +435,6 @@ class GraphicalView(object):
             #     # First draw the grid and then draw the shortest path
             #     self.render_all()
             #     self.render_path()
-
-            self.clock.tick(60)
 
         pygame.quit()
 
