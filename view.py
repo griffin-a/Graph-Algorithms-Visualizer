@@ -35,9 +35,12 @@ class ClickOperation(Enum):
     DELETE = 4
 
 
-class Square(pygame.Rect):
+class Square():
     def __init__(self, x, y, pred=-1, distance_from_source=float("inf"), square_type=SquareType.NORMAL):
-        super(Square, self).__init__(x * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+        self.__x = x
+        self.__y = y
+        self.u_x = x * SQUARE_SIZE
+        self.u_y = y * SQUARE_SIZE
         self.__distance_from_source = distance_from_source
         self.__neighbors = []
         self.__square_type = square_type
@@ -51,21 +54,21 @@ class Square(pygame.Rect):
     def distance_from_source(self, value):
         self.__distance_from_source = value
 
-    # @property
-    # def left(self):
-    #     return self.left
-    #
-    # @left.setter
-    # def left(self, value):
-    #     self.left = value
-    #
-    # @property
-    # def top(self):
-    #     return self.top
-    #
-    # @top.setter
-    # def top(self, value):
-    #     self.top = value
+    @property
+    def x(self):
+        return self.__x
+
+    @x.setter
+    def x(self, value):
+        self.__x = value
+
+    @property
+    def y(self):
+        return self.__y
+
+    @y.setter
+    def y(self, value):
+        self.__y = value
 
     @property
     def pred(self):
@@ -108,6 +111,26 @@ class Square(pygame.Rect):
     def __str__(self):
         return f"Square at position: ({self.left}, {self.top}) of type: {self.__square_type}"
 
+    def __hash__(self):
+        return super.__hash__(self)
+
+
+def get_neighbors(square):
+    if square.y - SQUARE_SIZE >= 0:
+        neighbor = Square(square.u_x, square.u_y - SQUARE_SIZE)
+        square.neighbors.append(neighbor)
+    if square.x - SQUARE_SIZE >= 0:
+        neighbor = Square(square.u_x - SQUARE_SIZE, square.u_y)
+        square.neighbors.append(neighbor)
+    if square.x + SQUARE_SIZE < WIDTH:
+        neighbor = Square((square.u_x + SQUARE_SIZE), square.u_y)
+        square.neighbors.append(neighbor)
+    if square.y + SQUARE_SIZE < HEIGHT:
+        neighbor = Square(square.u_x, square.u_y + SQUARE_SIZE)
+        square.neighbors.append(neighbor)
+
+    return square.neighbors
+
 
 class Model:
     def __init__(self):
@@ -123,34 +146,22 @@ class Model:
         self.__running = False
         self.shortest_path = []
 
-    def handle_click(self, click_pos, click_state, draw):
-        x, y = click_pos[0], click_pos[1]
-
-        for square in self.__squares.values():
-            if square.coordinate_in_square(x, y):
-                if click_state is ClickOperation.SET_START:
-                    square.square_type = SquareType.START
-                    self.__start = square
-                    # draw()
-                elif click_state is ClickOperation.SET_END:
-                    square.square_type = SquareType.END
-                    self.__end = square
-                    # draw()
-                elif click_state is ClickOperation.SET_WALL:
-                    square.square_type = SquareType.WALL
-                    # draw()
-
-    def get_neighbors(self, square):
-        if square.y - SQUARE_SIZE >= 0:
-            square.neighbors.append(self.__squares[(square.x, square.y - SQUARE_SIZE)])
-        if square.x - SQUARE_SIZE >= 0:
-            square.neighbors.append(self.__squares[(square.x - SQUARE_SIZE, square.y)])
-        if square.x + SQUARE_SIZE < WIDTH:
-            square.neighbors.append(self.__squares[(square.x + SQUARE_SIZE, square.y)])
-        if square.y + SQUARE_SIZE < HEIGHT:
-            square.neighbors.append(self.__squares[(square.x, square.y + SQUARE_SIZE)])
-
-        return square.neighbors
+    # def handle_click(self, click_pos, click_state, draw):
+    #     x, y = click_pos[0], click_pos[1]
+    #
+    #     for square in self.__squares.values():
+    #         if square.coordinate_in_square(x, y):
+    #             if click_state is ClickOperation.SET_START:
+    #                 square.square_type = SquareType.START
+    #                 self.__start = square
+    #                 # draw()
+    #             elif click_state is ClickOperation.SET_END:
+    #                 square.square_type = SquareType.END
+    #                 self.__end = square
+    #                 # draw()
+    #             elif click_state is ClickOperation.SET_WALL:
+    #                 square.square_type = SquareType.WALL
+    #                 # draw()
 
     # # Go through all of the neighbors in each of the four cardinal directions from the current square
     # # Out of the valid neighbors (squares that don't lie outside of the bounds), randomly pick one and return it
@@ -250,7 +261,7 @@ class Model:
             u = pq.popitem()[0]
             # print(f"u: {u}")
 
-            for v in self.get_neighbors(u):
+            for v in get_neighbors(u):
                 # print(f"v: {v}")
 
                 if v.square_type is SquareType.NORMAL or v.square_type is SquareType.END:
@@ -268,11 +279,14 @@ class Model:
                     # We want to encapsulate the entire grid and priority queue to be able to draw the updated state
                     # new_tick = TickEvent((self.__squares, pq))
                     # self.__event_manager.post(new_tick)
+                    render()
 
                 if v == self.__end or v.square_type is SquareType.END:
                     # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
                     #  event
                     self.shortest_path = self.get_shortest_path()
+                    print("Finished")
+                    render()
                     # print(self.shortest_path)
                     # self.__event_manager.post(StateChangeEvent(StateType.ENDED))
                     return v
@@ -353,15 +367,15 @@ class GraphicalView(object):
 
         for square in self.model.squares.values():
             if square.square_type is SquareType.NORMAL:
-                pygame.draw.rect(self.screen, GRAY, (square.left, square.top, SQUARE_SIZE, SQUARE_SIZE), 3)
+                pygame.draw.rect(self.screen, GRAY, (square.u_x, square.u_y, SQUARE_SIZE, SQUARE_SIZE), 3)
             if square.square_type is SquareType.START:
-                pygame.draw.rect(self.screen, GREEN, (square.x, square.y, SQUARE_SIZE, SQUARE_SIZE))
+                pygame.draw.rect(self.screen, GREEN, (square.u_x, square.u_y, SQUARE_SIZE, SQUARE_SIZE))
             elif square.square_type is SquareType.END:
-                pygame.draw.rect(self.screen, RED, (square.x, square.y, SQUARE_SIZE, SQUARE_SIZE))
+                pygame.draw.rect(self.screen, RED, (square.u_x, square.u_y, SQUARE_SIZE, SQUARE_SIZE))
             elif square.square_type is SquareType.DONE:
-                pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, SQUARE_SIZE, SQUARE_SIZE), 3)
+                pygame.draw.rect(self.screen, ORANGE, (square.u_x, square.u_y, SQUARE_SIZE, SQUARE_SIZE), 3)
             elif square.square_type is SquareType.WALL:
-                pygame.draw.rect(self.screen, BLACK, (square.x, square.y, SQUARE_SIZE, SQUARE_SIZE))
+                pygame.draw.rect(self.screen, BLACK, (square.u_x, square.u_y, SQUARE_SIZE, SQUARE_SIZE))
 
         pygame.display.flip()
 
@@ -396,6 +410,10 @@ class GraphicalView(object):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                if event.type == pygame.KEYDOWN:
+                    # Space key for start/stopping the visualizer
+                    if event.key == pygame.K_SPACE and self.model.start and self.model.end:
+                        self.model.dijkstra(lambda: self.render_all())
 
                 # The user has left clicked
                 if pygame.mouse.get_pressed()[0]:
@@ -404,26 +422,34 @@ class GraphicalView(object):
                     row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
                     # Check if the start has been set
                     if not self.model.start:
+                        # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.START)
                         self.model.start = square
                         self.model.squares[(row, col)] = square
 
                     elif not self.model.end:
+                        # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.END)
-                        if not square.colliderect(self.model.start):
+                        if square.x != self.model.start.x and square.y != self.model.start.y:
                             self.model.end = square
                             self.model.squares[(row, col)] = square
 
                     else:
+                        # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.WALL)
-                        if not square.colliderect(self.model.start) and not square.colliderect(self.model.end):
+                        if (square.x != self.model.start.x and square.y != self.model.start.y) \
+                                and (square.y != self.model.end.y and square.y != self.model.end.y):
                             self.model.squares[(row, col)] = square
 
                     # The user has right clicked
-                elif event.button == 3:
-                    self.model.handle_click(click_pos)
-            self.render_all()
+                elif pygame.mouse.get_pressed()[2]:
+                    click_pos = pygame.mouse.get_pos()
+                    row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
 
+                    if self.model.squares[(row, col)]:
+                        self.model.squares[(row, col)] = None
+
+            self.render_all()
 
             # if current_state == model.StateType.SELECTION:
             #     self.render_all()
