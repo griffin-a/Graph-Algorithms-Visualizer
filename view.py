@@ -109,10 +109,7 @@ class Square():
     #     return self.__x <= x <= self.__x + SQUARE_SIZE and self.__y <= y <= self.__y + SQUARE_SIZE
 
     def __str__(self):
-        return f"Square at position: ({self.left}, {self.top}) of type: {self.__square_type}"
-
-    def __hash__(self):
-        return super.__hash__(self)
+        return f"Square at position: ({self.x}, {self.y}) of type: {self.__square_type}"
 
 
 def get_neighbors(square):
@@ -424,7 +421,6 @@ class GraphicalView(object):
                     if not self.model.start:
                         # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.START)
-
 
                         self.model.start = square
                         self.model.squares[(row, col)] = square
