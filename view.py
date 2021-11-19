@@ -35,10 +35,9 @@ class ClickOperation(Enum):
     DELETE = 4
 
 
-class Square:
+class Square(pygame.Rect):
     def __init__(self, x, y, pred=-1, distance_from_source=float("inf"), square_type=SquareType.NORMAL):
-        self.__x = x
-        self.__y = y
+        super(Square, self).__init__(x, y, SQUARE_SIZE, SQUARE_SIZE)
         self.__distance_from_source = distance_from_source
         self.__neighbors = []
         self.__square_type = square_type
@@ -53,20 +52,20 @@ class Square:
         self.__distance_from_source = value
 
     @property
-    def x(self):
-        return self.__x
+    def left(self):
+        return self.left
 
-    @x.setter
-    def x(self, value):
-        self.__x = value
+    @left.setter
+    def left(self, value):
+        self.left = value
 
     @property
-    def y(self):
-        return self.__y
+    def top(self):
+        return self.top
 
-    @y.setter
-    def y(self, value):
-        self.__y = value
+    @top.setter
+    def top(self, value):
+        self.top = value
 
     @property
     def pred(self):
@@ -92,12 +91,12 @@ class Square:
     def square_type(self, value):
         self.__square_type = value
 
-    # Given an (x,y) coordinate, returns if the coordinate is within the square
-    def coordinate_in_square(self, x, y):
-        return self.__x <= x <= self.__x + SQUARE_SIZE and self.__y <= y <= self.__y + SQUARE_SIZE
+    # # Given an (x,y) coordinate, returns if the coordinate is within the square
+    # def coordinate_in_square(self, x, y):
+    #     return self.__x <= x <= self.__x + SQUARE_SIZE and self.__y <= y <= self.__y + SQUARE_SIZE
 
     def __str__(self):
-        return f"Square at position: ({self.__x}, {self.__y}) of type: {self.__square_type}"
+        return f"Square at position: ({self.left}, {self.top}) of type: {self.__square_type}"
 
 
 class Model:
@@ -347,6 +346,15 @@ class GraphicalView(object):
         for square in self.model.shortest_path:
             pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, SQUARE_SIZE, SQUARE_SIZE))
 
+    def get_clicked_pos(self, pos, rows, width):
+        gap = width // rows
+        y, x = pos
+
+        row = y // gap
+        col = x // gap
+
+        return row, col
+
     def initialize(self):
         """
         Set up the pygame graphical display and loads graphical resources.
@@ -371,17 +379,16 @@ class GraphicalView(object):
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     click_pos = pygame.mouse.get_pos()
-                    x, y = click_pos[0], click_pos[1]
+
 
                     # The user has left clicked
                     if event.button == 1:
                         # Check if the start has been set
-                        if not self.model.start:
-                            self.model.handle_click(click_pos, ClickOperation.SET_START, lambda: self.render_all())
-                        elif not self.model.end:
-                            self.model.handle_click(click_pos, ClickOperation.SET_END, lambda: self.render_all())
-                        else:
-                            self.model.handle_click(click_pos, ClickOperation.SET_WALL, lambda: self.render_all())
+                        # if not self.model.start:
+                        #
+                        # elif not self.model.end:
+                        # else:
+                        print(self.get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
                     # The user has right clicked
                     # elif event.button == 3:
                     #     self.model.handle_click(click_pos)
