@@ -424,22 +424,24 @@ class GraphicalView(object):
                     if not self.model.start:
                         # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.START)
+
+
                         self.model.start = square
                         self.model.squares[(row, col)] = square
 
-                    elif not self.model.end:
+                    elif not self.model.end and self.model.start:
                         # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.END)
-                        if square.x != self.model.start.x and square.y != self.model.start.y:
-                            self.model.end = square
-                            self.model.squares[(row, col)] = square
+                        # if square.x != self.model.start.x and square.y != self.model.start.y:
+                        self.model.end = square
+                        self.model.squares[(row, col)] = square
 
-                    else:
+                    elif self.model.start and self.model.end:
                         # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.WALL)
-                        if (square.x != self.model.start.x and square.y != self.model.start.y) \
-                                and (square.y != self.model.end.y and square.y != self.model.end.y):
-                            self.model.squares[(row, col)] = square
+                        # if (square.x != self.model.start.x and square.y != self.model.start.y) \
+                        #         and (square.y != self.model.end.y and square.y != self.model.end.y):
+                        self.model.squares[(row, col)] = square
 
                     # The user has right clicked
                 elif pygame.mouse.get_pressed()[2]:
