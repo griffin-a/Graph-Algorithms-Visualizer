@@ -19,6 +19,9 @@ This includes, application logic and the grid with all of its respective squares
 WIDTH = HEIGHT = 600
 SQUARE_SIZE = 20
 
+tick_e = pygame.event.Event(pygame.USEREVENT, attr1='tick')
+done_e = pygame.event.Event(pygame.USEREVENT, attr1='done')
+
 
 class SquareType(Enum):
     START = 1,
@@ -95,7 +98,7 @@ class Square:
         self.__square_type = value
 
     def render_square(self, window):
-        x,y = self.x * SQUARE_SIZE, self.y * SQUARE_SIZE
+        x, y = self.x * SQUARE_SIZE, self.y * SQUARE_SIZE
         if self.square_type is SquareType.NORMAL:
             pygame.draw.rect(window, GRAY, (x, y, SQUARE_SIZE, SQUARE_SIZE), 3)
 
@@ -300,7 +303,7 @@ class Model:
                         v.distance_from_source = u.distance_from_source + cost
                         v.pred = u
 
-                        if v is not SquareType.END:
+                        if v.square_type is not SquareType.END:
                             print(v)
                             v.square_type = SquareType.DONE
 
@@ -311,6 +314,7 @@ class Model:
                     # new_tick = TickEvent((self.__squares, pq))
                     # self.__event_manager.post(new_tick)
                     # v.render_square(screen)
+                    pygame.event.post(tick_e)
 
                 # render()
 
@@ -323,6 +327,8 @@ class Model:
                     print(self.shortest_path)
                     # self.__event_manager.post(StateChangeEvent(StateType.ENDED))
                     # v.render_square(screen)
+                    pygame.event.post(done_e)
+
                     return v
 
     def get_shortest_path(self, square):
@@ -398,7 +404,7 @@ class GraphicalView(object):
         self.small_font = None
 
     def render_all(self):
-        self.render_grid()
+        # self.render_grid()
 
         for square in self.model.squares.values():
             if square.square_type is SquareType.NORMAL:
@@ -429,7 +435,8 @@ class GraphicalView(object):
 
     def render_path(self):
         for square in self.model.shortest_path:
-            pygame.draw.rect(self.screen, ORANGE, (square.x, square.y, SQUARE_SIZE, SQUARE_SIZE))
+            pygame.draw.rect(self.screen, ORANGE,
+                             (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
     def initialize(self):
         """
@@ -450,7 +457,14 @@ class GraphicalView(object):
         self.running = True
 
         while self.running:
+            self.render_all()
             for event in pygame.event.get():
+                # if event == tick_e:
+                #     self.render_all()
+                #
+                if event == done_e:
+                    self.render_path()
+
                 if event.type == pygame.QUIT:
                     self.running = False
                 if event.type == pygame.KEYDOWN:
@@ -504,8 +518,7 @@ class GraphicalView(object):
                     if self.model.squares[(row, col)]:
                         self.model.squares[(row, col)] = None
 
-            pygame.time.wait(60)
-            self.draw()
+            # pygame.time.wait(60)
 
             # if current_state == model.StateType.SELECTION:
             #     self.render_all()
