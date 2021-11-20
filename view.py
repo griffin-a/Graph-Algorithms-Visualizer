@@ -111,6 +111,9 @@ class Square:
     def __str__(self):
         return f"Square at position: ({self.x}, {self.y}) of type: {self.__square_type}"
 
+    def collides(self, other):
+        return self.__x == other.x and self.y == other.y
+
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
@@ -119,23 +122,6 @@ class Square:
 
     def __lt__(self, other):
         return (self.__x, self.__y) < (other.x, other.y)
-
-
-def get_neighbors(square):
-    if square.y - 1 >= 0:
-        neighbor = Square(square.x, square.y - 1)
-        square.neighbors.append(neighbor)
-    if square.x - 1 >= 0:
-        neighbor = Square(square.x - 1, square.y)
-        square.neighbors.append(neighbor)
-    if square.x + 1 < WIDTH:
-        neighbor = Square((square.x + 1), square.y)
-        square.neighbors.append(neighbor)
-    if square.y + 1 < HEIGHT:
-        neighbor = Square(square.x, square.y + 1)
-        square.neighbors.append(neighbor)
-
-    return square.neighbors
 
 
 class Model:
@@ -258,6 +244,38 @@ class Model:
     #
     #             stack.append(chosen_neighbor)
 
+    def get_neighbors(self, square):
+        if square.y - 1 >= 0:
+            type = SquareType.NORMAL
+            neighbor = Square(square.x, square.y - 1)
+            if neighbor == self.__end:
+                type = SquareType.END
+            neighbor.square_type = type
+            square.neighbors.append(neighbor)
+        if square.x - 1 >= 0:
+            type = SquareType.NORMAL
+            neighbor = Square(square.x - 1, square.y)
+            if neighbor == self.__end:
+                type = SquareType.END
+            neighbor.square_type = type
+            square.neighbors.append(neighbor)
+        if square.x + 1 < WIDTH:
+            type = SquareType.NORMAL
+            neighbor = Square(square.x + 1, square.y)
+            if neighbor == self.__end:
+                type = SquareType.END
+            neighbor.square_type = type
+            square.neighbors.append(neighbor)
+        if square.y + 1 < HEIGHT:
+            type = SquareType.NORMAL
+            neighbor = Square(square.x, square.y + 1)
+            if neighbor == self.__end:
+                type = SquareType.END
+            neighbor.square_type = type
+            square.neighbors.append(neighbor)
+
+        return square.neighbors
+
     def dijkstra(self, render):
         done = set()
         pq = PriorityQueue()
@@ -270,7 +288,7 @@ class Model:
 
             if u not in done:
                 done.add(u)
-                neighbors = get_neighbors(u)
+                neighbors = self.get_neighbors(u)
                 for v in neighbors:
                     # print(f"v: {v}")
 
@@ -280,7 +298,8 @@ class Model:
                         if u.distance_from_source + cost < v.distance_from_source:
                             v.distance_from_source = u.distance_from_source + cost
                             v.pred = u
-                            if v.square_type is not SquareType.END:
+
+                            if v != self.__end and v.square_type is not SquareType.END:
                                 print(v)
                                 v.square_type = SquareType.DONE
 
@@ -295,16 +314,18 @@ class Model:
                     if v == self.__end or v.square_type is SquareType.END:
                         # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
                         #  event
-                        self.shortest_path = self.get_shortest_path()
+                        # self.__end = v
+                        self.shortest_path = self.get_shortest_path(v)
                         print(v)
                         print("Finished")
                         # render()
-                        # print(self.shortest_path)
+                        print(self.shortest_path)
                         # self.__event_manager.post(StateChangeEvent(StateType.ENDED))
                         return v
 
-    def get_shortest_path(self):
-        current_square = self.__end
+    def get_shortest_path(self, square):
+        current_square = square
+        print(current_square.pred)
         path = []
 
         while current_square.pred != -1:
@@ -446,7 +467,11 @@ class GraphicalView(object):
                         square = Square(row, col, -1, 0, SquareType.END)
 
                         # if square.x != self.model.start.x and square.y != self.model.start.y:
-                        if square != self.model.start:
+                        # if square != self.model.start:
+                        #     print(square)
+                        #     self.model.end = square
+                        #     self.model.squares[(row, col)] = square
+                        if not square.collides(self.model.start):
                             print(square)
                             self.model.end = square
                             self.model.squares[(row, col)] = square
@@ -456,7 +481,9 @@ class GraphicalView(object):
                         square = Square(row, col, -1, 0, SquareType.WALL)
                         # if (square.x != self.model.start.x and square.y != self.model.start.y) \
                         #         and (square.y != self.model.end.y and square.y != self.model.end.y):
-                        if square != self.model.start and square != self.model.end:
+                        # if square != self.model.start and square != self.model.end:
+                        #     self.model.squares[(row, col)] = square
+                        if not square.collides(self.model.start) and not square.collides(self.model.end):
                             self.model.squares[(row, col)] = square
 
                     # The user has right clicked
