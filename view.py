@@ -101,7 +101,6 @@ class Square:
         x, y = self.x * SQUARE_SIZE, self.y * SQUARE_SIZE
         if self.square_type is SquareType.NORMAL:
             pygame.draw.rect(window, GRAY, (x, y, SQUARE_SIZE, SQUARE_SIZE), 3)
-
         elif self.square_type is SquareType.START:
             pygame.draw.rect(window, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
         elif self.square_type is SquareType.END:
@@ -144,6 +143,10 @@ class Model:
         self.__end = None
         self.__running = False
         self.shortest_path = []
+
+    def reset_grid(self):
+        self.__squares = {(x, y): Square(x, y) for x in range(0, (WIDTH // SQUARE_SIZE)) for y in
+                          range(0, (HEIGHT // SQUARE_SIZE))}
 
     # def handle_click(self, click_pos, click_state, draw):
     #     x, y = click_pos[0], click_pos[1]
@@ -314,7 +317,7 @@ class Model:
                     # new_tick = TickEvent((self.__squares, pq))
                     # self.__event_manager.post(new_tick)
                     # v.render_square(screen)
-                    pygame.event.post(tick_e)
+                    # pygame.event.post(tick_e)
 
                 # render()
 
@@ -409,7 +412,7 @@ class GraphicalView(object):
         for square in self.model.squares.values():
             if square.square_type is SquareType.NORMAL:
                 pygame.draw.rect(self.screen, GRAY, (square.u_x, square.u_y, SQUARE_SIZE, SQUARE_SIZE), 3)
-            if square.square_type is SquareType.START:
+            elif square.square_type is SquareType.START:
                 pygame.draw.rect(self.screen, GREEN, (square.u_x, square.u_y, SQUARE_SIZE, SQUARE_SIZE))
             elif square.square_type is SquareType.END:
                 pygame.draw.rect(self.screen, RED, (square.u_x, square.u_y, SQUARE_SIZE, SQUARE_SIZE))
@@ -457,6 +460,7 @@ class GraphicalView(object):
         self.running = True
 
         while self.running:
+            # self.clock.tick(60)
             self.render_all()
             for event in pygame.event.get():
                 # if event == tick_e:
@@ -471,6 +475,12 @@ class GraphicalView(object):
                     # Space key for start/stopping the visualizer
                     if event.key == pygame.K_SPACE and self.model.start and self.model.end:
                         self.model.dijkstra()
+                    elif event.key == pygame.K_c:
+                        self.model.start = None
+                        self.model.end = None
+                        self.model.reset_grid()
+                        self.render_all()
+
 
                 # The user has left clicked
                 if pygame.mouse.get_pressed()[0]:
@@ -515,9 +525,16 @@ class GraphicalView(object):
                     click_pos = pygame.mouse.get_pos()
                     row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
 
-                    if self.model.squares[(row, col)]:
-                        self.model.squares[(row, col)] = None
+                    square = self.model.squares[(row, col)]
 
+                    if square == self.model.start:
+                        self.model.start = None
+                        self.model.squares[(row, col)] = Square(row, col, -1, float("inf"), SquareType.NORMAL)
+                        print(self.model.start)
+                        print(self.model.squares[(row, col)])
+
+                    elif square == self.model.end:
+                        print("Erase end")
             # pygame.time.wait(60)
 
             # if current_state == model.StateType.SELECTION:
