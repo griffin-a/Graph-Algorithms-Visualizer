@@ -481,7 +481,6 @@ class GraphicalView(object):
                         self.model.reset_grid()
                         self.render_all()
 
-
                 # The user has left clicked
                 if pygame.mouse.get_pressed()[0]:
                     click_pos = pygame.mouse.get_pos()
