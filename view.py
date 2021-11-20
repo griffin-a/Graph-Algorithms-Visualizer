@@ -1,5 +1,5 @@
 import pygame
-
+from queue import PriorityQueue
 from heapdict import heapdict
 import random
 import math
@@ -114,19 +114,25 @@ class Square:
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
+    def __hash__(self):
+        return hash((self.__x, self.__y))
+
+    def __lt__(self, other):
+        return (self.__x, self.__y) < (other.x, other.y)
+
 
 def get_neighbors(square):
-    if square.y - SQUARE_SIZE >= 0:
-        neighbor = Square(square.u_x, square.u_y - SQUARE_SIZE)
+    if square.y - 1 >= 0:
+        neighbor = Square(square.x, square.y - 1)
         square.neighbors.append(neighbor)
-    if square.x - SQUARE_SIZE >= 0:
-        neighbor = Square(square.u_x - SQUARE_SIZE, square.u_y)
+    if square.x - 1 >= 0:
+        neighbor = Square(square.x - 1, square.y)
         square.neighbors.append(neighbor)
-    if square.x + SQUARE_SIZE < WIDTH:
-        neighbor = Square((square.u_x + SQUARE_SIZE), square.u_y)
+    if square.x + 1 < WIDTH:
+        neighbor = Square((square.x + 1), square.y)
         square.neighbors.append(neighbor)
-    if square.y + SQUARE_SIZE < HEIGHT:
-        neighbor = Square(square.u_x, square.u_y + SQUARE_SIZE)
+    if square.y + 1 < HEIGHT:
+        neighbor = Square(square.x, square.y + 1)
         square.neighbors.append(neighbor)
 
     return square.neighbors
@@ -253,43 +259,49 @@ class Model:
     #             stack.append(chosen_neighbor)
 
     def dijkstra(self, render):
-        pq = heapdict()
-        pq[self.__start] = 0
+        done = set()
+        pq = PriorityQueue()
+        pq.put((0, self.__start))
 
         while pq:
-            # A tuple is returned, where the fist item is the square and the second value is the priority
-            u = pq.popitem()[0]
+            # A tuple is returned, where the fist item is the priority and the second value is square
+            u = pq.get()[1]
             # print(f"u: {u}")
 
-            for v in get_neighbors(u):
-                # print(f"v: {v}")
+            if u not in done:
+                done.add(u)
+                neighbors = get_neighbors(u)
+                for v in neighbors:
+                    # print(f"v: {v}")
 
-                if v.square_type is SquareType.NORMAL or v.square_type is SquareType.END:
-                    cost = math.dist((u.x, u.y), (v.x, v.y))
+                    if v not in done and v.square_type is SquareType.NORMAL or v.square_type is SquareType.END:
+                        cost = math.dist((u.x, u.y), (v.x, v.y))
 
-                    if u.distance_from_source + cost < v.distance_from_source:
-                        v.distance_from_source = u.distance_from_source + cost
-                        v.pred = u
-                        if v.square_type is not SquareType.END:
-                            v.square_type = SquareType.DONE
+                        if u.distance_from_source + cost < v.distance_from_source:
+                            v.distance_from_source = u.distance_from_source + cost
+                            v.pred = u
+                            if v.square_type is not SquareType.END:
+                                print(v)
+                                v.square_type = SquareType.DONE
 
-                        pq[v] = v.distance_from_source
+                            pq.put((v.distance_from_source, v))
 
-                    # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
-                    # We want to encapsulate the entire grid and priority queue to be able to draw the updated state
-                    # new_tick = TickEvent((self.__squares, pq))
-                    # self.__event_manager.post(new_tick)
-                    render()
+                        # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
+                        # We want to encapsulate the entire grid and priority queue to be able to draw the updated state
+                        # new_tick = TickEvent((self.__squares, pq))
+                        # self.__event_manager.post(new_tick)
+                        # render()
 
-                if v == self.__end or v.square_type is SquareType.END:
-                    # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
-                    #  event
-                    self.shortest_path = self.get_shortest_path()
-                    print("Finished")
-                    render()
-                    # print(self.shortest_path)
-                    # self.__event_manager.post(StateChangeEvent(StateType.ENDED))
-                    return v
+                    if v == self.__end or v.square_type is SquareType.END:
+                        # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
+                        #  event
+                        self.shortest_path = self.get_shortest_path()
+                        print(v)
+                        print("Finished")
+                        # render()
+                        # print(self.shortest_path)
+                        # self.__event_manager.post(StateChangeEvent(StateType.ENDED))
+                        return v
 
     def get_shortest_path(self):
         current_square = self.__end
@@ -424,6 +436,7 @@ class GraphicalView(object):
                     if not self.model.start:
                         # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.START)
+                        print(square)
 
                         self.model.start = square
                         self.model.squares[(row, col)] = square
@@ -434,6 +447,7 @@ class GraphicalView(object):
 
                         # if square.x != self.model.start.x and square.y != self.model.start.y:
                         if square != self.model.start:
+                            print(square)
                             self.model.end = square
                             self.model.squares[(row, col)] = square
 
