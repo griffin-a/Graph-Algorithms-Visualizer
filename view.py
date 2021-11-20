@@ -94,15 +94,19 @@ class Square:
     def square_type(self, value):
         self.__square_type = value
 
-    # def render_square(self, window):
-    #     if self.square_type is SquareType.START:
-    #         pygame.draw.rect(window, GREEN, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE))
-    #     elif self.square_type is SquareType.END:
-    #         pygame.draw.rect(window, RED, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE))
-    #     elif self.square_type is SquareType.DONE:
-    #         pygame.draw.rect(window, ORANGE, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE), 3)
-    #     elif self.square_type is SquareType.WALL:
-    #         pygame.draw.rect(window, BLACK, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE))
+    def render_square(self, window):
+        x,y = self.x * SQUARE_SIZE, self.y * SQUARE_SIZE
+        if self.square_type is SquareType.NORMAL:
+            pygame.draw.rect(window, GRAY, (x, y, SQUARE_SIZE, SQUARE_SIZE), 3)
+
+        elif self.square_type is SquareType.START:
+            pygame.draw.rect(window, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+        elif self.square_type is SquareType.END:
+            pygame.draw.rect(window, RED, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+        elif self.square_type is SquareType.DONE:
+            pygame.draw.rect(window, ORANGE, (x, y, SQUARE_SIZE, SQUARE_SIZE), 3)
+        elif self.square_type is SquareType.WALL:
+            pygame.draw.rect(window, BLACK, (x, y, SQUARE_SIZE, SQUARE_SIZE))
 
     # # Given an (x,y) coordinate, returns if the coordinate is within the square
     # def coordinate_in_square(self, x, y):
@@ -114,14 +118,14 @@ class Square:
     def collides(self, other):
         return self.__x == other.x and self.y == other.y
 
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
-
-    def __hash__(self):
-        return hash((self.__x, self.__y))
-
-    def __lt__(self, other):
-        return (self.__x, self.__y) < (other.x, other.y)
+    # def __eq__(self, other):
+    #     return self.x == other.x and self.y == other.y
+    #
+    # def __hash__(self):
+    #     return hash((self.__x, self.__y))
+    #
+    # def __lt__(self, other):
+    #     return (self.__x, self.__y) < (other.x, other.y)
 
 
 class Model:
@@ -130,9 +134,9 @@ class Model:
         # squares We want to create a square for each position in the grid
         # TODO: See if we need to alter each
         #  square's x,y coordinates to make each square at a distance of 1 from each other
-        # self.__squares = {(x, y): Square(x, y) for x in range(0, WIDTH, SQUARE_SIZE) for y in
-        #                   range(0, HEIGHT, SQUARE_SIZE)}
-        self.__squares = {}
+        self.__squares = {(x, y): Square(x, y) for x in range(0, (WIDTH // SQUARE_SIZE)) for y in
+                          range(0, (HEIGHT // SQUARE_SIZE))}
+        # self.__squares = {}
         self.__start = None
         self.__end = None
         self.__running = False
@@ -247,28 +251,28 @@ class Model:
     def get_neighbors(self, square):
         if square.y - 1 >= 0:
             type = SquareType.NORMAL
-            neighbor = Square(square.x, square.y - 1)
+            neighbor = self.__squares[(square.x, square.y - 1)]
             if neighbor == self.__end:
                 type = SquareType.END
             neighbor.square_type = type
             square.neighbors.append(neighbor)
         if square.x - 1 >= 0:
             type = SquareType.NORMAL
-            neighbor = Square(square.x - 1, square.y)
+            neighbor = self.__squares[(square.x - 1, square.y)]
             if neighbor == self.__end:
                 type = SquareType.END
             neighbor.square_type = type
             square.neighbors.append(neighbor)
-        if square.x + 1 < WIDTH:
+        if square.x + 1 < (WIDTH // SQUARE_SIZE):
             type = SquareType.NORMAL
-            neighbor = Square(square.x + 1, square.y)
+            neighbor = self.__squares[(square.x + 1, square.y)]
             if neighbor == self.__end:
                 type = SquareType.END
             neighbor.square_type = type
             square.neighbors.append(neighbor)
-        if square.y + 1 < HEIGHT:
+        if square.y + 1 < (HEIGHT // SQUARE_SIZE):
             type = SquareType.NORMAL
-            neighbor = Square(square.x, square.y + 1)
+            neighbor = self.__squares[(square.x, square.y + 1)]
             if neighbor == self.__end:
                 type = SquareType.END
             neighbor.square_type = type
@@ -276,55 +280,53 @@ class Model:
 
         return square.neighbors
 
-    def dijkstra(self, render):
-        done = set()
-        pq = PriorityQueue()
-        pq.put((0, self.__start))
+    def dijkstra(self):
+        pq = heapdict()
+        pq[self.__start] = 0
 
         while pq:
             # A tuple is returned, where the fist item is the priority and the second value is square
-            u = pq.get()[1]
+            u = pq.popitem()[0]
             # print(f"u: {u}")
 
-            if u not in done:
-                done.add(u)
-                neighbors = self.get_neighbors(u)
-                for v in neighbors:
-                    # print(f"v: {v}")
+            neighbors = self.get_neighbors(u)
+            for v in neighbors:
+                # print(f"v: {v}")
 
-                    if v not in done and v.square_type is SquareType.NORMAL or v.square_type is SquareType.END:
-                        cost = math.dist((u.x, u.y), (v.x, v.y))
+                if v.square_type is SquareType.NORMAL or v.square_type is SquareType.END:
+                    cost = math.dist((u.x, u.y), (v.x, v.y))
 
-                        if u.distance_from_source + cost < v.distance_from_source:
-                            v.distance_from_source = u.distance_from_source + cost
-                            v.pred = u
+                    if u.distance_from_source + cost < v.distance_from_source:
+                        v.distance_from_source = u.distance_from_source + cost
+                        v.pred = u
 
-                            if v != self.__end and v.square_type is not SquareType.END:
-                                print(v)
-                                v.square_type = SquareType.DONE
+                        if v is not SquareType.END:
+                            print(v)
+                            v.square_type = SquareType.DONE
 
-                            pq.put((v.distance_from_source, v))
+                        pq[v] = v.distance_from_source
 
-                        # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
-                        # We want to encapsulate the entire grid and priority queue to be able to draw the updated state
-                        # new_tick = TickEvent((self.__squares, pq))
-                        # self.__event_manager.post(new_tick)
-                        # render()
+                    # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
+                    # We want to encapsulate the entire grid and priority queue to be able to draw the updated state
+                    # new_tick = TickEvent((self.__squares, pq))
+                    # self.__event_manager.post(new_tick)
+                    # v.render_square(screen)
 
-                    if v == self.__end or v.square_type is SquareType.END:
-                        # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
-                        #  event
-                        # self.__end = v
-                        self.shortest_path = self.get_shortest_path(v)
-                        print(v)
-                        print("Finished")
-                        # render()
-                        print(self.shortest_path)
-                        # self.__event_manager.post(StateChangeEvent(StateType.ENDED))
-                        return v
+                # render()
+
+                if v == self.__end or v.square_type is SquareType.END:
+                    # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
+                    #  event
+                    self.shortest_path = self.get_shortest_path(v)
+                    print(v)
+                    print("Finished")
+                    print(self.shortest_path)
+                    # self.__event_manager.post(StateChangeEvent(StateType.ENDED))
+                    # v.render_square(screen)
+                    return v
 
     def get_shortest_path(self, square):
-        current_square = square
+        current_square = self.__end
         print(current_square.pred)
         path = []
 
@@ -410,7 +412,15 @@ class GraphicalView(object):
             elif square.square_type is SquareType.WALL:
                 pygame.draw.rect(self.screen, BLACK, (square.u_x, square.u_y, SQUARE_SIZE, SQUARE_SIZE))
 
-        pygame.display.flip()
+        pygame.display.update()
+
+    def draw(self):
+        # self.render_grid()
+
+        for square in self.model.squares.values():
+            square.render_square(self.screen)
+
+        pygame.display.update()
 
     def render_grid(self):
         for x in range(0, WIDTH, SQUARE_SIZE):
@@ -446,7 +456,7 @@ class GraphicalView(object):
                 if event.type == pygame.KEYDOWN:
                     # Space key for start/stopping the visualizer
                     if event.key == pygame.K_SPACE and self.model.start and self.model.end:
-                        self.model.dijkstra(lambda: self.render_all())
+                        self.model.dijkstra()
 
                 # The user has left clicked
                 if pygame.mouse.get_pressed()[0]:
@@ -464,7 +474,7 @@ class GraphicalView(object):
 
                     elif not self.model.end and self.model.start:
                         # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
-                        square = Square(row, col, -1, 0, SquareType.END)
+                        square = Square(row, col, -1, float("inf"), SquareType.END)
 
                         # if square.x != self.model.start.x and square.y != self.model.start.y:
                         # if square != self.model.start:
@@ -494,7 +504,8 @@ class GraphicalView(object):
                     if self.model.squares[(row, col)]:
                         self.model.squares[(row, col)] = None
 
-            self.render_all()
+            pygame.time.wait(60)
+            self.draw()
 
             # if current_state == model.StateType.SELECTION:
             #     self.render_all()
