@@ -35,7 +35,7 @@ class ClickOperation(Enum):
     DELETE = 4
 
 
-class Square():
+class Square:
     def __init__(self, x, y, pred=-1, distance_from_source=float("inf"), square_type=SquareType.NORMAL):
         self.__x = x
         self.__y = y
@@ -94,15 +94,15 @@ class Square():
     def square_type(self, value):
         self.__square_type = value
 
-    def render_square(self, window):
-        if self.square_type is SquareType.START:
-            pygame.draw.rect(window, GREEN, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE))
-        elif self.square_type is SquareType.END:
-            pygame.draw.rect(window, RED, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE))
-        elif self.square_type is SquareType.DONE:
-            pygame.draw.rect(window, ORANGE, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE), 3)
-        elif self.square_type is SquareType.WALL:
-            pygame.draw.rect(window, BLACK, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE))
+    # def render_square(self, window):
+    #     if self.square_type is SquareType.START:
+    #         pygame.draw.rect(window, GREEN, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE))
+    #     elif self.square_type is SquareType.END:
+    #         pygame.draw.rect(window, RED, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE))
+    #     elif self.square_type is SquareType.DONE:
+    #         pygame.draw.rect(window, ORANGE, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE), 3)
+    #     elif self.square_type is SquareType.WALL:
+    #         pygame.draw.rect(window, BLACK, (self.left, self.top, SQUARE_SIZE, SQUARE_SIZE))
 
     # # Given an (x,y) coordinate, returns if the coordinate is within the square
     # def coordinate_in_square(self, x, y):
@@ -110,6 +110,9 @@ class Square():
 
     def __str__(self):
         return f"Square at position: ({self.x}, {self.y}) of type: {self.__square_type}"
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
 
 
 def get_neighbors(square):
@@ -428,16 +431,19 @@ class GraphicalView(object):
                     elif not self.model.end and self.model.start:
                         # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.END)
+
                         # if square.x != self.model.start.x and square.y != self.model.start.y:
-                        self.model.end = square
-                        self.model.squares[(row, col)] = square
+                        if square != self.model.start:
+                            self.model.end = square
+                            self.model.squares[(row, col)] = square
 
                     elif self.model.start and self.model.end:
                         # u_row, u_col = row * SQUARE_SIZE, col * SQUARE_SIZE
                         square = Square(row, col, -1, 0, SquareType.WALL)
                         # if (square.x != self.model.start.x and square.y != self.model.start.y) \
                         #         and (square.y != self.model.end.y and square.y != self.model.end.y):
-                        self.model.squares[(row, col)] = square
+                        if square != self.model.start and square != self.model.end:
+                            self.model.squares[(row, col)] = square
 
                     # The user has right clicked
                 elif pygame.mouse.get_pressed()[2]:
