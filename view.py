@@ -101,13 +101,13 @@ class Square:
         x, y = self.x * SQUARE_SIZE, self.y * SQUARE_SIZE
         if self.square_type is SquareType.NORMAL:
             pygame.draw.rect(window, GRAY, (x, y, SQUARE_SIZE, SQUARE_SIZE), 3)
-        elif self.square_type is SquareType.START:
+        if self.square_type is SquareType.START:
             pygame.draw.rect(window, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
-        elif self.square_type is SquareType.END:
+        if self.square_type is SquareType.END:
             pygame.draw.rect(window, RED, (x, y, SQUARE_SIZE, SQUARE_SIZE))
-        elif self.square_type is SquareType.DONE:
+        if self.square_type is SquareType.DONE:
             pygame.draw.rect(window, ORANGE, (x, y, SQUARE_SIZE, SQUARE_SIZE), 3)
-        elif self.square_type is SquareType.WALL:
+        if self.square_type is SquareType.WALL:
             pygame.draw.rect(window, BLACK, (x, y, SQUARE_SIZE, SQUARE_SIZE))
 
     # # Given an (x,y) coordinate, returns if the coordinate is within the square
@@ -256,32 +256,16 @@ class Model:
 
     def get_neighbors(self, square):
         if square.y - 1 >= 0:
-            type = SquareType.NORMAL
             neighbor = self.__squares[(square.x, square.y - 1)]
-            if neighbor == self.__end:
-                type = SquareType.END
-            neighbor.square_type = type
             square.neighbors.append(neighbor)
         if square.x - 1 >= 0:
-            type = SquareType.NORMAL
             neighbor = self.__squares[(square.x - 1, square.y)]
-            if neighbor == self.__end:
-                type = SquareType.END
-            neighbor.square_type = type
             square.neighbors.append(neighbor)
         if square.x + 1 < (WIDTH // SQUARE_SIZE):
-            type = SquareType.NORMAL
             neighbor = self.__squares[(square.x + 1, square.y)]
-            if neighbor == self.__end:
-                type = SquareType.END
-            neighbor.square_type = type
             square.neighbors.append(neighbor)
         if square.y + 1 < (HEIGHT // SQUARE_SIZE):
-            type = SquareType.NORMAL
             neighbor = self.__squares[(square.x, square.y + 1)]
-            if neighbor == self.__end:
-                type = SquareType.END
-            neighbor.square_type = type
             square.neighbors.append(neighbor)
 
         return square.neighbors
@@ -317,7 +301,7 @@ class Model:
                     # new_tick = TickEvent((self.__squares, pq))
                     # self.__event_manager.post(new_tick)
                     # v.render_square(screen)
-                    # pygame.event.post(tick_e)
+                    pygame.event.post(tick_e)
 
                 # render()
 
@@ -453,20 +437,20 @@ class GraphicalView(object):
         self.clock = pygame.time.Clock()
         self.small_font = pygame.font.Font(None, 40)
         self.screen.fill(WHITE)
-        self.render_all()
+        self.draw()
 
     def run(self):
         self.initialize()
         self.running = True
 
         while self.running:
-            # self.clock.tick(60)
-            self.render_all()
             for event in pygame.event.get():
-                # if event == tick_e:
-                #     self.render_all()
-                #
+                if event == tick_e:
+                    pass
                 if event == done_e:
+                    for square in self.model.squares.values():
+                        if square.square_type is SquareType.DONE:
+                            print(square)
                     self.render_path()
 
                 if event.type == pygame.QUIT:
@@ -479,7 +463,7 @@ class GraphicalView(object):
                         self.model.start = None
                         self.model.end = None
                         self.model.reset_grid()
-                        self.render_all()
+                        self.draw()
 
                 # The user has left clicked
                 if pygame.mouse.get_pressed()[0]:
@@ -534,7 +518,6 @@ class GraphicalView(object):
 
                     elif square == self.model.end:
                         print("Erase end")
-            # pygame.time.wait(60)
 
             # if current_state == model.StateType.SELECTION:
             #     self.render_all()
@@ -546,6 +529,9 @@ class GraphicalView(object):
             #     # First draw the grid and then draw the shortest path
             #     self.render_all()
             #     self.render_path()
+            self.draw()
+
+            self.clock.tick(60)
 
         pygame.quit()
 

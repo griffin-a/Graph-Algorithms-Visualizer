@@ -38,10 +38,24 @@ class KeydownAction(EventHandler):
         print("action")
 
 
+def initialize(self):
+    """
+    Set up the pygame graphical display and loads graphical resources.
+    """
+
+    pygame.init()
+    pygame.font.init()
+    pygame.display.set_caption('demo game')
+    self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    self.clock = pygame.time.Clock()
+    self.small_font = pygame.font.Font(None, 40)
+    self.screen.fill(WHITE)
+    self.render_all()
+
+
 EventHandler.add(pygame.QUIT, Exit)
 EventHandler.add(pygame.KEYDOWN, KeydownPrint)
 EventHandler.add(pygame.KEYDOWN, KeydownAction)
-
 
 while True:
     for event in pygame.event.get():
