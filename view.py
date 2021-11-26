@@ -270,7 +270,7 @@ class Model:
 
         return square.neighbors
 
-    def dijkstra(self):
+    def dijkstra(self, draw, clock):
         pq = heapdict()
         pq[self.__start] = 0
 
@@ -303,7 +303,8 @@ class Model:
                     # v.render_square(screen)
                     pygame.event.post(tick_e)
 
-                # render()
+                # clock.tick(60)
+                draw()
 
                 if v == self.__end or v.square_type is SquareType.END:
                     # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
@@ -444,9 +445,11 @@ class GraphicalView(object):
         self.running = True
 
         while self.running:
+            # self.draw()
             for event in pygame.event.get():
                 if event == tick_e:
                     pass
+                    # pygame.draw.rect(self.screen, GRAY, (0, 0, SQUARE_SIZE, SQUARE_SIZE))
                 if event == done_e:
                     for square in self.model.squares.values():
                         if square.square_type is SquareType.DONE:
@@ -458,7 +461,7 @@ class GraphicalView(object):
                 if event.type == pygame.KEYDOWN:
                     # Space key for start/stopping the visualizer
                     if event.key == pygame.K_SPACE and self.model.start and self.model.end:
-                        self.model.dijkstra()
+                        self.model.dijkstra(lambda: self.draw(), self.clock)
                     elif event.key == pygame.K_c:
                         self.model.start = None
                         self.model.end = None
