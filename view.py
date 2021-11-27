@@ -1,11 +1,13 @@
 """
-Classes:
+Classes
+-------
     Model
     GraphicalView
     SquareType(Enum)
     ClickOperation(Enum
 
-Functions:
+Functions
+---------
     get_clicked_pos(pos, rows, width) -> (int, int)
 
 
@@ -237,10 +239,7 @@ class Model:
 
     def reset_grid(self):
         """
-
-        Returns
-        -------
-
+        Resets the grid of squares to default state
         """
         self.__squares = {(x, y): Square(x, y) for x in range(0, (WIDTH // SQUARE_SIZE)) for y in
                           range(0, (HEIGHT // SQUARE_SIZE))}
@@ -250,10 +249,18 @@ class Model:
 
         Parameters
         ----------
-        square
+        square : Square
+            The square for which neighbors are found
 
         Returns
         -------
+        square.neighbors : list of Square(s)
+            Returns the neighbors of the square
+
+        Notes
+        -----
+        Essentially sets the list of neighbors and then returns it. Neighbors are squares at any distance of 1 away
+        from this square.
 
         """
         if square.y - 1 >= 0:
@@ -273,14 +280,21 @@ class Model:
 
     def dijkstra(self, draw):
         """
+        An implementation of Dijkstra's algorithm for squares on a grid.
 
         Parameters
         ----------
-        draw
+        draw : void lambda function
+            Draws all of the squares. Passed in from GraphicalView
 
         Returns
         -------
+        v : Square
+            The end square once it has been reached by the algorithm.
 
+        Notes
+        -----
+        This particular implementation of Dijkstra's algorithm makes use of a heapdict for
         """
         pq = heapdict()
         pq[self.__start] = 0
