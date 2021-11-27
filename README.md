@@ -14,5 +14,5 @@ Please ensure that you are on the "SimplifiedVersion" branch; run the main metho
 ## Credit/References
 The "main" branch has code based on an MVC structure for pygame as outlined by [wesleywerner](https://github.com/wesleywerner) on Github. All credit goes to [wesleywerner](https://github.com/wesleywerner) for his work on an MVC design pattern implementation for pygame.
 
-Please refer to this repository to see his work: [mvc-game-design]([wesleywerner](https://github.com/wesleywerner)).
+Please refer to this repository to see his work: [mvc-game-design](https://github.com/wesleywerner/mvc-game-design).
 
