@@ -305,13 +305,11 @@ class Model:
         pq[self.__start] = 0
 
         while pq:
-            # A tuple is returned, where the fist item is the priority and the second value is square
+            # A tuple is returned, where the fist item is the square and the second value is distance (priority)
             u = pq.popitem()[0]
-            # print(f"u: {u}")
 
             neighbors = self.get_neighbors(u)
             for v in neighbors:
-                # print(f"v: {v}")
 
                 if v.square_type is SquareType.NORMAL or v.square_type is SquareType.END:
                     cost = math.dist((u.x, u.y), (v.x, v.y))
@@ -320,31 +318,24 @@ class Model:
                         v.distance_from_source = u.distance_from_source + cost
                         v.prev = u
 
+                        # Only change type to DONE if the square is not the end square
                         if v.square_type is not SquareType.END:
-                            # print(v)
                             v.square_type = SquareType.DONE
 
+                        # Decrease priority (update the priority of current square in priority queue)
                         pq[v] = v.distance_from_source
 
-                    # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update
-                    # We want to encapsulate the entire grid and priority queue to be able to draw the updated state
-                    # new_tick = TickEvent((self.__squares, pq))
-                    # self.__event_manager.post(new_tick)
-                    # v.render_square(screen)
-                    pygame.event.post(tick_e)
+                # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update.
+                # Unsure how to implement this correctly...
+                #  pygame.event.post(tick_e)
 
-                # clock.tick(60)
+                # Instead of posting a tick event to the pygame event queue, draw() is directly called here
                 draw()
 
+                # The end square has been reached
                 if v == self.__end or v.square_type is SquareType.END:
-                    # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
-                    #  event
                     self.shortest_path = self.get_shortest_path()
-                    # print(v)
-                    print("Finished")
-                    print(self.shortest_path)
-                    # self.__event_manager.post(StateChangeEvent(StateType.ENDED))
-                    # v.render_square(screen)
+                    # Notify the pygame event queue that the algorithm has terminated: draw the shortest path
                     pygame.event.post(done_e)
 
                     return v
