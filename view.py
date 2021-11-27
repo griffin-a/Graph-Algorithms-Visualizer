@@ -49,19 +49,19 @@ class Square:
 
     Attributes
     ----------
-    x : int
+    __x : int
         x position of square in grid (each grid square corresponds to one (x, y) position
-    y : int
+    __y : int
         y position of square in grid (each grid square corresponds to one (x, y) position
-    prev : Square
+    __prev : Square
         The previous neighbor of a square; only relevant for Dijkstra's Algorithm
-    u_x : int
+    __u_x : int
         A translated version of x position; this is used for drawing purposes only
-    u_y : int
+    __u_y : int
         A translated version of y position; this is used for drawing purposes only
-    distance_from_source : int
+    __distance_from_source : int
         Indicates the distance of the square from the source node (start). Used for Dijkstra's.
-    neighbors : list[Square]
+    __neighbors : list[Square]
         The neighbors of the square. Used for Dijkstra's.
     square_type : SquareType
         An enum value of the particular square type (used for distinguishing squares in Dijkstra's).
@@ -145,9 +145,12 @@ class Square:
 
     def render_square(self, window):
         """
-        A drawing method for drawing a square.
-        :param window: the pygame surface for drawing on is passed into render_square
-        :return:
+        A method for drawing a square.
+
+        Parameters
+        ----------
+        window : pygame.Surface
+            The screen object for drawing
         """
         if self.square_type is SquareType.NORMAL:
             pygame.draw.rect(window, GRAY, (self.__u_x, self.__u_y, SQUARE_SIZE, SQUARE_SIZE), 3)
@@ -165,12 +168,21 @@ class Square:
 
     def collides(self, other):
         """
-        Determines whether or not the current square matches another given square. The decision to implement this
-        functionality in a custom method instead of __eq__ was to ensure that heapdict works properly (as overriding
-        __eq__ alters the default hashing implementation)
-        :param other: the other square that is being checked
-        :type other: Square
-        :return: bool
+        Determines whether or not the current square matches another given square.
+
+        Parameters
+        ----------
+        other : Square
+            The other square to check for equality
+        Returns
+        -------
+        bool
+            Whether or not the input square is equal to this square
+
+        Notes
+        -----
+        The decision to implement this functionality in a custom method instead of __eq__ was to ensure that heapdict
+        works properly (as overriding __eq__ alters the default hashing implementation).
         """
         return self.__x == other.x and self.y == other.y
 
@@ -193,18 +205,27 @@ class Model:
 
         Attributes
         ----------
-        x : int
+        __squares : dict of form (int, int) : Square
             x position of square in grid (each grid square corresponds to one (x, y) position
-        y : int
-            y position of square in grid (each grid square corresponds to one (x, y) position
-        prev : Square
+        __start : Square
+            The start square as a source for Dijkstra's algorithm
+        __end : Square
+            The end square as a destination for Dijkstra's algorithm
+        __running : bool
+            Whether or not pygame loop is running
+        shortest_path : list of Square(s)
+            Represents the shortest path from start to end
 
         Methods
         -------
-        render_square(window):
-            Renders the current square
-        collides(other):
-            Essentially __eq__ implementation; checks if current square and other square are equal.
+        reset_grid():
+            Resets every square in the grid to its default state
+        get_neighbors(square):
+            Gets neighbors of a given square
+        def dijkstra(draw):
+            Dijkstra's algorithm implementation based on Euclidean distance
+        def get_shortest_path():
+            Returns the shortest path
         """
     def __init__(self):
         self.__squares = {(x, y): Square(x, y) for x in range(0, (WIDTH // SQUARE_SIZE)) for y in
@@ -215,10 +236,26 @@ class Model:
         self.shortest_path = []
 
     def reset_grid(self):
+        """
+
+        Returns
+        -------
+
+        """
         self.__squares = {(x, y): Square(x, y) for x in range(0, (WIDTH // SQUARE_SIZE)) for y in
                           range(0, (HEIGHT // SQUARE_SIZE))}
 
     def get_neighbors(self, square):
+        """
+
+        Parameters
+        ----------
+        square
+
+        Returns
+        -------
+
+        """
         if square.y - 1 >= 0:
             neighbor = self.__squares[(square.x, square.y - 1)]
             square.neighbors.append(neighbor)
@@ -235,6 +272,16 @@ class Model:
         return square.neighbors
 
     def dijkstra(self, draw):
+        """
+
+        Parameters
+        ----------
+        draw
+
+        Returns
+        -------
+
+        """
         pq = heapdict()
         pq[self.__start] = 0
 
@@ -284,6 +331,12 @@ class Model:
                     return v
 
     def get_shortest_path(self):
+        """
+
+        Returns
+        -------
+
+        """
         current_square = self.__end
         path = []
 
@@ -319,6 +372,18 @@ class Model:
 
 
 def get_clicked_pos(pos, rows, width):
+    """
+
+    Parameters
+    ----------
+    pos
+    rows
+    width
+
+    Returns
+    -------
+
+    """
     gap = width // rows
     y, x = pos
 
@@ -328,8 +393,8 @@ def get_clicked_pos(pos, rows, width):
     return row, col
 
 
+# Class structure adapted from MVC-game-design as found in references section
 class GraphicalView:
-    # TODO: Create a new method here that creates a new square based on click position
     # Drawing will instead be handled on a square to square level rather than iterating the entire squares list
     # Lambda functions will be used for this purpose to allow drawing to occur
     """
@@ -370,12 +435,24 @@ class GraphicalView:
         pygame.display.update()
 
     def draw(self):
+        """
+
+        Returns
+        -------
+
+        """
         for square in self.model.squares.values():
             square.render_square(self.screen)
 
         pygame.display.update()
 
     def render_path(self):
+        """
+
+        Returns
+        -------
+
+        """
         for square in self.model.shortest_path:
             pygame.draw.rect(self.screen, ORANGE,
                              (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
@@ -395,6 +472,12 @@ class GraphicalView:
         self.draw()
 
     def run(self):
+        """
+
+        Returns
+        -------
+
+        """
         self.initialize()
         self.running = True
 
