@@ -6,7 +6,7 @@ Classes:
     ClickOperation(Enum
 
 Functions:
-    get_clicked_pos(pos, rows, width) -> int tuple
+    get_clicked_pos(pos, rows, width) -> (int, int)
     
 Uses pygame and heapdict (priority queue/heap implementation)
 """
