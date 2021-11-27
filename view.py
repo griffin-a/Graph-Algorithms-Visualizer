@@ -48,22 +48,41 @@ class Square:
     Attributes
     ----------
     x : int
-        x position of square
+        x position of square in grid (each grid square corresponds to one (x, y) position
     y : int
-        y position of square
-    prev : int
+        y position of square in grid (each grid square corresponds to one (x, y) position
+    prev : Square
+        The previous neighbor of a square; only relevant for Dijkstra's Algorithm
+    u_x : int
+        A translated version of x position; this is used for drawing purposes only
+    u_y : int
+        A translated version of y position; this is used for drawing purposes only
+    distance_from_source : int
+        Indicates the distance of the square from the source node (start). Used for Dijkstra's.
+    neighbors : list[Square]
+        The neighbors of the square. Used for Dijkstra's.
+    square_type : SquareType
+        An enum value of the particular square type (used for distinguishing squares in Dijkstra's).
 
+    Methods
+    -------
+    render_square(window):
+        Renders the current square
+    collides(other):
+        Essentially __eq__ implementation; checks if current square and other square are equal.
     """
+
     def __init__(self, x, y, prev=None, distance_from_source=float("inf"), square_type=SquareType.NORMAL):
         self.__x = x
         self.__y = y
-        self.u_x = x * SQUARE_SIZE
-        self.u_y = y * SQUARE_SIZE
+        self.__u_x = x * SQUARE_SIZE
+        self.__u_y = y * SQUARE_SIZE
         self.__distance_from_source = distance_from_source
         self.__neighbors = []
         self.__square_type = square_type
         self.__prev = prev
 
+    # Beginning of getters/setters
     @property
     def distance_from_source(self):
         return self.__distance_from_source
@@ -112,23 +131,45 @@ class Square:
     def square_type(self, value):
         self.__square_type = value
 
+    @property
+    def u_x(self):
+        return self.__u_x
+
+    @u_x.setter
+    def u_x(self, value):
+        self.__u_x = value
+
+    # End of getters/setters
+
     def render_square(self, window):
-        x, y = self.x * SQUARE_SIZE, self.y * SQUARE_SIZE
+        """
+        A drawing method for drawing a square.
+        :param window: the pygame surface for drawing on is passed into render_square
+        :return:
+        """
         if self.square_type is SquareType.NORMAL:
-            pygame.draw.rect(window, GRAY, (x, y, SQUARE_SIZE, SQUARE_SIZE), 3)
+            pygame.draw.rect(window, GRAY, (self.__u_x, self.__u_y, SQUARE_SIZE, SQUARE_SIZE), 3)
         if self.square_type is SquareType.START:
-            pygame.draw.rect(window, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+            pygame.draw.rect(window, GREEN, (self.__u_x, self.__u_y, SQUARE_SIZE, SQUARE_SIZE))
         if self.square_type is SquareType.END:
-            pygame.draw.rect(window, RED, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+            pygame.draw.rect(window, RED, (self.__u_x, self.__u_y, SQUARE_SIZE, SQUARE_SIZE))
         if self.square_type is SquareType.DONE:
-            pygame.draw.rect(window, ORANGE, (x, y, SQUARE_SIZE, SQUARE_SIZE), 3)
+            pygame.draw.rect(window, ORANGE, (self.__u_x, self.__u_y, SQUARE_SIZE, SQUARE_SIZE), 3)
         if self.square_type is SquareType.WALL:
-            pygame.draw.rect(window, BLACK, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+            pygame.draw.rect(window, BLACK, (self.__u_x, self.__u_y, SQUARE_SIZE, SQUARE_SIZE))
 
     def __str__(self):
         return f"Square at position: ({self.x}, {self.y}) of type: {self.__square_type}"
 
     def collides(self, other):
+        """
+        Determines whether or not the current square matches another given square. The decision to implement this
+        functionality in a custom method instead of __eq__ was to ensure that heapdict works properly (as overriding
+        __eq__ alters the default hashing implementation)
+        :param other: the other square that is being checked
+        :type other: Square
+        :return: bool
+        """
         return self.__x == other.x and self.y == other.y
 
     # def __eq__(self, other):
@@ -142,12 +183,30 @@ class Square:
 
 
 class Model:
+    """
+        This class encapsulates all inner state of the visualizer.
+        This includes application logic and the grid with all of its respective squares.
+
+        ...
+
+        Attributes
+        ----------
+        x : int
+            x position of square in grid (each grid square corresponds to one (x, y) position
+        y : int
+            y position of square in grid (each grid square corresponds to one (x, y) position
+        prev : Square
+
+        Methods
+        -------
+        render_square(window):
+            Renders the current square
+        collides(other):
+            Essentially __eq__ implementation; checks if current square and other square are equal.
+        """
     def __init__(self):
-        # All of type Square When we first initialize the model, we want to set the initial state of all of the
-        # squares. We want to create a square for each position in the grid
         self.__squares = {(x, y): Square(x, y) for x in range(0, (WIDTH // SQUARE_SIZE)) for y in
                           range(0, (HEIGHT // SQUARE_SIZE))}
-        # self.__squares = {}
         self.__start = None
         self.__end = None
         self.__running = False
@@ -367,13 +426,13 @@ class GraphicalView:
                     row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
                     # Check if the start has been set
                     if not self.model.start:
-                        square = Square(row, col, -1, 0, SquareType.START)
+                        square = Square(row, col, None, 0, SquareType.START)
 
                         self.model.start = square
                         self.model.squares[(row, col)] = square
 
                     elif not self.model.end and self.model.start:
-                        square = Square(row, col, -1, float("inf"), SquareType.END)
+                        square = Square(row, col, None, float("inf"), SquareType.END)
 
                         if not square.collides(self.model.start):
                             print(square)
