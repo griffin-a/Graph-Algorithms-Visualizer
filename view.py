@@ -7,9 +7,11 @@ Classes:
 
 Functions:
     get_clicked_pos(pos, rows, width) -> (int, int)
-    
+
+
 Uses pygame and heapdict (priority queue/heap implementation)
 """
+# TODO: format all docstrings in numpy format
 import pygame
 from heapdict import heapdict
 import math
