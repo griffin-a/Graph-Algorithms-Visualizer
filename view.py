@@ -229,6 +229,7 @@ class Model:
         def get_shortest_path():
             Returns the shortest path
         """
+
     def __init__(self):
         self.__squares = {(x, y): Square(x, y) for x in range(0, (WIDTH // SQUARE_SIZE)) for y in
                           range(0, (HEIGHT // SQUARE_SIZE))}
@@ -279,7 +280,7 @@ class Model:
         return square.neighbors
 
     def dijkstra(self, draw):
-        """
+        r"""
         An implementation of Dijkstra's algorithm for squares on a grid.
 
         Parameters
@@ -294,7 +295,11 @@ class Model:
 
         Notes
         -----
-        This particular implementation of Dijkstra's algorithm makes use of a heapdict for
+        This particular implementation of Dijkstra's algorithm makes use of a heapdict, which is essentially
+        a priority queue. This ensures :math: `O((|V| + |E|)\log|V|)` time complexity. Implementation is similar to a
+        traditional adjacency list implementation of Dijkstra's algorithm, in that the operation to find neighbors
+        runs in :math: `O(1)` time. As each square is reached, its state is changed to SquareType.DONE. If the end
+        square is reached, the shortest path is determined and the algorithm terminates.
         """
         pq = heapdict()
         pq[self.__start] = 0
