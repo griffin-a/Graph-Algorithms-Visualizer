@@ -7,6 +7,8 @@ Classes:
 
 Functions:
     get_clicked_pos(pos, rows, width) -> int tuple
+    
+Uses pygame and heapdict (priority queue/heap implementation)
 """
 import pygame
 from heapdict import heapdict
@@ -49,10 +51,10 @@ class Square:
         x position of square
     y : int
         y position of square
-    pred :
+    prev : int
 
     """
-    def __init__(self, x, y, pred=-1, distance_from_source=float("inf"), square_type=SquareType.NORMAL):
+    def __init__(self, x, y, prev=None, distance_from_source=float("inf"), square_type=SquareType.NORMAL):
         self.__x = x
         self.__y = y
         self.u_x = x * SQUARE_SIZE
@@ -60,7 +62,7 @@ class Square:
         self.__distance_from_source = distance_from_source
         self.__neighbors = []
         self.__square_type = square_type
-        self.__pred = pred
+        self.__prev = prev
 
     @property
     def distance_from_source(self):
@@ -87,12 +89,12 @@ class Square:
         self.__y = value
 
     @property
-    def pred(self):
-        return self.__pred
+    def prev(self):
+        return self.__prev
 
-    @pred.setter
-    def pred(self, value):
-        self.__pred = value
+    @prev.setter
+    def prev(self, value):
+        self.__prev = value
 
     @property
     def neighbors(self):
@@ -189,7 +191,7 @@ class Model:
 
                     if u.distance_from_source + cost < v.distance_from_source:
                         v.distance_from_source = u.distance_from_source + cost
-                        v.pred = u
+                        v.prev = u
 
                         if v.square_type is not SquareType.END:
                             # print(v)
@@ -210,7 +212,7 @@ class Model:
                 if v == self.__end or v.square_type is SquareType.END:
                     # TODO: Notify all listeners that the algorithm has terminated and post the shortest path in the
                     #  event
-                    self.shortest_path = self.get_shortest_path(v)
+                    self.shortest_path = self.get_shortest_path()
                     # print(v)
                     print("Finished")
                     print(self.shortest_path)
@@ -220,14 +222,13 @@ class Model:
 
                     return v
 
-    def get_shortest_path(self, square):
+    def get_shortest_path(self):
         current_square = self.__end
-        print(current_square.pred)
         path = []
 
-        while current_square.pred != -1:
+        while current_square.prev:
             path.append(current_square)
-            current_square = current_square.pred
+            current_square = current_square.prev
 
         return path
 
