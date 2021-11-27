@@ -1,23 +1,29 @@
+"""
+Classes:
+    Model
+    GraphicalView
+    SquareType(Enum)
+    ClickOperation(Enum
+
+Functions:
+    get_clicked_pos(pos, rows, width) -> int tuple
+"""
 import pygame
 from heapdict import heapdict
-import random
 import math
 from enum import Enum
 
+# Constants
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 ORANGE = (255, 165, 0)
 BLACK = (0, 0, 0)
-
-"""
-This class encapsulates all inner state of the visualizer. 
-This includes, application logic and the grid with all of its respective squares
-"""
 WIDTH = HEIGHT = 600
 SQUARE_SIZE = 20
 
+# User events
 tick_e = pygame.event.Event(pygame.USEREVENT, attr1='tick')
 done_e = pygame.event.Event(pygame.USEREVENT, attr1='done')
 
@@ -30,14 +36,22 @@ class SquareType(Enum):
     DONE = 5
 
 
-class ClickOperation(Enum):
-    SET_START = 1,
-    SET_END = 2,
-    SET_WALL = 3
-    DELETE = 4
-
-
 class Square:
+    """
+    This class encapsulates all inner state of the visualizer.
+    This includes, application logic and the grid with all of its respective squares.
+
+    ...
+
+    Attributes
+    ----------
+    x : int
+        x position of square
+    y : int
+        y position of square
+    pred :
+
+    """
     def __init__(self, x, y, pred=-1, distance_from_source=float("inf"), square_type=SquareType.NORMAL):
         self.__x = x
         self.__y = y
@@ -252,7 +266,7 @@ def get_clicked_pos(pos, rows, width):
     return row, col
 
 
-class GraphicalView(object):
+class GraphicalView:
     # TODO: Create a new method here that creates a new square based on click position
     # Drawing will instead be handled on a square to square level rather than iterating the entire squares list
     # Lambda functions will be used for this purpose to allow drawing to occur
@@ -388,8 +402,7 @@ class GraphicalView(object):
                         print("Erase end")
 
             self.draw()
-
-            # self.clock.tick(30)
+            self.clock.tick(60)
 
         pygame.quit()
 
