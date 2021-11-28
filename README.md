@@ -11,6 +11,10 @@ My attempt at a graph algorithm visualizer in pygame. To be extended in the futu
 ## Running the program
 Please ensure that you are on the "SimplifiedVersion" branch; run the main method in "main.py".
 
+Left clicking enables you to set the "start", "end" and any "wall" squares in that order. Note that you must first set the "start" square before you can set the "end" square; you also must set the "end" square before you can create any walls.
+
+To start the algorithm visualization, press space once you have set all of the desired squares. Please note that at this stage, error handling isn't fully implemented. Deletion of squares is not yet completed either. 
+
 ## Credit/References
 The "main" branch has code based on an MVC structure for pygame as outlined by [wesleywerner](https://github.com/wesleywerner) on Github. All credit goes to [wesleywerner](https://github.com/wesleywerner) for his work on an MVC design pattern implementation for pygame.
 
