@@ -18,6 +18,7 @@ Left clicking enables you to set the "start", "end" and any "wall" squares in th
 To start the algorithm visualization, press space once you have set all of the desired squares. Please note that at this stage, error handling isn't fully implemented. Deletion of squares is not yet completed either. 
 
 ### Main branch
+Left click to set "start" square, then right click to set "end" square. After that, "wall" squares can be added by left-clicking. Ensure that mouse input occurs in this order. error handling isn't implemented, nor is ability to delete squares.
 
 ## Credit/References
 The "main" branch has code based on an MVC structure for pygame as outlined by [wesleywerner](https://github.com/wesleywerner) on Github. All credit goes to [wesleywerner](https://github.com/wesleywerner) for his work on an MVC design pattern implementation for pygame.
