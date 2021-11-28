@@ -354,7 +354,6 @@ class Model:
                     return v
             # clock.tick(60)
 
-
     def get_shortest_path(self):
         """
         Get the shortest path from start to end
@@ -537,11 +536,12 @@ class GraphicalView:
                         self.model.dijkstra(lambda: self.draw(), self.clock)
 
                     # TODO: implement being able to clear the grid
-                    # elif event.key == pygame.K_c:
-                    #     self.model.start = None
-                    #     self.model.end = None
-                    #     self.model.reset_grid()
-                    #     self.draw()
+                    elif event.key == pygame.K_c:
+                        self.model.start = None
+                        self.model.end = None
+                        self.model.reset_grid()
+                        self.screen.fill(WHITE)
+                        self.draw()
 
                 # The user has left clicked
                 if pygame.mouse.get_pressed()[0]:
