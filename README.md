@@ -25,3 +25,5 @@ The "main" branch has code based on an MVC structure for pygame as outlined by [
 
 Please refer to this repository to see his work: [mvc-game-design](https://github.com/wesleywerner/mvc-game-design).
 
+This project is inspired by [this video](https://youtu.be/19h1g22hby8) and others like it.
+
