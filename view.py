@@ -1,4 +1,8 @@
 """
+Module level details
+
+...
+
 Classes
 -------
     Model
@@ -10,10 +14,11 @@ Functions
 ---------
     get_clicked_pos(pos, rows, width) -> (int, int)
 
-
+Notes
+-----
 Uses pygame and heapdict (priority queue/heap implementation)
 """
-# TODO: format all docstrings in numpy format
+
 import pygame
 from heapdict import heapdict
 import math
@@ -331,6 +336,8 @@ class Model:
                 #  pygame.event.post(tick_e)
 
                 # Instead of posting a tick event to the pygame event queue, draw() is directly called here
+                # TODO: drawing at each algorithm step is required, but it appears to cause significant lag;
+                #  how can this lag be fixed? Unsure if it is due to dijkstra being called in pygame event queue loop.
                 draw()
 
                 # The end square has been reached
