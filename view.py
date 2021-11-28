@@ -284,7 +284,7 @@ class Model:
 
         return square.neighbors
 
-    def dijkstra(self, draw):
+    def dijkstra(self, draw, clock):
         r"""
         An implementation of Dijkstra's algorithm for squares on a grid.
 
@@ -306,6 +306,7 @@ class Model:
         runs in :math: `O(1)` time. As each square is reached, its state is changed to SquareType.DONE. If the end
         square is reached, the shortest path is determined and the algorithm terminates.
         """
+        i = 0
         pq = heapdict()
         # The start square's distance from itself is 0
         pq[self.__start] = 0
@@ -333,12 +334,16 @@ class Model:
 
                 # TODO: Tick update here: one iteration of the algorithm has finished, we now need to update.
                 # Unsure how to implement this correctly...
-                #  pygame.event.post(tick_e)
 
                 # Instead of posting a tick event to the pygame event queue, draw() is directly called here
                 # TODO: drawing at each algorithm step is required, but it appears to cause significant lag;
                 #  how can this lag be fixed? Unsure if it is due to dijkstra being called in pygame event queue loop.
-                draw()
+                # draw()
+
+                if i % 30 == 0:
+                    draw()
+
+                i += 1
 
                 # The end square has been reached
                 if v == self.__end or v.square_type is SquareType.END:
@@ -347,6 +352,8 @@ class Model:
                     pygame.event.post(done_e)
 
                     return v
+            # clock.tick(60)
+
 
     def get_shortest_path(self):
         """
@@ -516,7 +523,7 @@ class GraphicalView:
             for event in pygame.event.get():
                 # Only consider using tick events if the algorithm can redraw at each increment without lag
                 if event == tick_e:
-                    pass
+                    self.draw()
                 # The algorithm has terminated; draw the shortest path
                 if event == done_e:
                     self.render_path()
@@ -527,7 +534,7 @@ class GraphicalView:
                     # Space key for start/stopping the visualizer
                     # As of now, only starting the visualizer works
                     if event.key == pygame.K_SPACE and self.model.start and self.model.end:
-                        self.model.dijkstra(lambda: self.draw())
+                        self.model.dijkstra(lambda: self.draw(), self.clock)
 
                     # TODO: implement being able to clear the grid
                     # elif event.key == pygame.K_c:
@@ -585,7 +592,6 @@ class GraphicalView:
                 #         pass
 
             self.draw()
-            self.clock.tick(60)
 
         pygame.quit()
 
