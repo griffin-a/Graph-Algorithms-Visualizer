@@ -1,7 +1,8 @@
 # A Graph Algorithm Visualizer
 ## _W.I.P. pygame simulation app for graph algorithms_
 
-My attempt at a graph algorithm visualizer in pygame. To be extended in the future.
+My attempt at a graph algorithm visualizer in pygame. To be extended in the future. 
+Determines the shortest path from source to end (solves the SSSP to accomplish this).
 
 ## Current Features
 
