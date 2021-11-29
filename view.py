@@ -249,6 +249,10 @@ class Model:
             Gets neighbors of a given square
         dijkstra(draw):
             Dijkstra's algorithm implementation based on Euclidean distance
+        __h(a, b):
+            Private heuristic method that acts as a subroutine for the A* algorithm
+        a_star(draw):
+            A* algorithm implementation based on Manhattan distance
         get_shortest_path():
             Returns the shortest path
         cycle_algorithm():
@@ -380,6 +384,43 @@ class Model:
 
         # print("Algorithm terminated and pq empty")
         pygame.event.post(unreachable_e)
+
+    def __h(self, a, b):
+        """
+        Heuristic method that is used as a subroutine in A*
+
+        Parameters
+        ----------
+        a : Square
+            The current square
+        b : Square
+            Another square for which the  Manhattan distance is found
+
+        Returns
+        -------
+        int
+            The Manhattan distance between a and b.
+        """
+        pass
+
+    def a_star(self, draw):
+        """
+        Implementation of the A* pathfinding algorithm using Manhattan distance as a heuristic function.
+
+        Parameters
+        ----------
+        draw : void lambda method
+
+        Returns
+        -------
+        v : Square
+            The end node once it is reached
+
+        Notes
+        -----
+
+        """
+        pass
 
     def get_shortest_path(self):
         """
@@ -558,6 +599,7 @@ class GraphicalView:
                 # The algorithm has terminated; draw the shortest path
                 if event == done_e:
                     self.render_path()
+                    self.model.game_state = GameState.DONE
                 if event == unreachable_e:
                     print("The end square was blocked; no path could be found!")
 
