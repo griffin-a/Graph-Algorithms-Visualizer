@@ -37,6 +37,7 @@ SQUARE_SIZE = 20
 # User events
 tick_e = pygame.event.Event(pygame.USEREVENT, attr1='tick')
 done_e = pygame.event.Event(pygame.USEREVENT, attr1='done')
+unreachable_e = pygame.event.Event(pygame.USEREVENT, attr='unreachable')
 
 
 class SquareType(Enum):
@@ -304,7 +305,9 @@ class Model:
         a priority queue. This ensures :math: `O((|V| + |E|)\log|V|)` time complexity. Implementation is similar to a
         traditional adjacency list implementation of Dijkstra's algorithm, in that the operation to find neighbors
         runs in :math: `O(1)` time. As each square is reached, its state is changed to SquareType.DONE. If the end
-        square is reached, the shortest path is determined and the algorithm terminates.
+        square is reached, the shortest path is determined and the algorithm terminates by returning the end node.
+        If the end node isn't reached, i.e. no path exists from start to end, then the while loop exits as the pq is
+        empty. A event is therefore posted to display an error message.
         """
         i = 0
         pq = heapdict()
@@ -353,6 +356,9 @@ class Model:
 
                     return v
             # clock.tick(60)
+
+        # print("Algorithm terminated and pq empty")
+        pygame.event.post(unreachable_e)
 
     def get_shortest_path(self):
         """
@@ -526,6 +532,8 @@ class GraphicalView:
                 # The algorithm has terminated; draw the shortest path
                 if event == done_e:
                     self.render_path()
+                if event == unreachable_e:
+                    print("The end square was blocked; no path could be found!")
 
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -535,7 +543,7 @@ class GraphicalView:
                     if event.key == pygame.K_SPACE and self.model.start and self.model.end:
                         self.model.dijkstra(lambda: self.draw(), self.clock)
 
-                    # TODO: implement being able to clear the grid
+                    # Clearing the entire grid
                     elif event.key == pygame.K_c:
                         self.model.start = None
                         self.model.end = None
@@ -575,22 +583,32 @@ class GraphicalView:
                             self.model.squares[(row, col)] = square
 
                 # The user has right clicked
-                # TODO: Implement deletion ability for clicked square
-                # elif pygame.mouse.get_pressed()[2]:
-                #     click_pos = pygame.mouse.get_pos()
-                #     row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
-                #
-                #     square = self.model.squares[(row, col)]
-                #
-                #     if square == self.model.start:
-                #         self.model.start = None
-                #         self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
-                #         print(self.model.start)
-                #         print(self.model.squares[(row, col)])
-                #
-                #     elif square == self.model.end:
-                #         pass
+                # Deletion of independent squares
+                elif pygame.mouse.get_pressed()[2]:
+                    click_pos = pygame.mouse.get_pos()
+                    row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
 
+                    square = self.model.squares[(row, col)]
+
+                    if square == self.model.start:
+                        self.model.start = None
+                        self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
+                        pygame.draw.rect(self.screen, WHITE,
+                                         (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                        self.draw()
+
+                    elif square == self.model.end:
+                        self.model.end = None
+                        self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
+                        pygame.draw.rect(self.screen, WHITE,
+                                         (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                        self.draw()
+
+                    elif square.square_type is SquareType.WALL:
+                        self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
+                        pygame.draw.rect(self.screen, WHITE,
+                                         (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                        self.draw()
             self.draw()
 
         pygame.quit()
