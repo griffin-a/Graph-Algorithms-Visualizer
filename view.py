@@ -253,6 +253,8 @@ class Model:
             Private heuristic method that acts as a subroutine for the A* algorithm
         a_star(draw):
             A* algorithm implementation based on Manhattan distance
+        bfs(draw):
+            Classic breadth-first-search algorithm
         get_shortest_path():
             Returns the shortest path
         cycle_algorithm():
@@ -671,65 +673,65 @@ class GraphicalView:
 
                 # The user has left clicked
                 if pygame.mouse.get_pressed()[0]:
-                    if self.model.game_state is GameState.SELECTION:
-                        click_pos = pygame.mouse.get_pos()
+                    # if self.model.game_state is GameState.SELECTION:
+                    click_pos = pygame.mouse.get_pos()
 
-                        # Get the (x, y) position of the clicked square
-                        row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
+                    # Get the (x, y) position of the clicked square
+                    row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
 
-                        # Check if the start has been set
-                        if not self.model.start:
-                            square = Square(row, col, None, 0, SquareType.START)
+                    # Check if the start has been set
+                    if not self.model.start:
+                        square = Square(row, col, None, 0, SquareType.START)
 
-                            self.model.start = square
+                        self.model.start = square
+                        self.model.squares[(row, col)] = square
+
+                    # Only allow the end square to be set if the start square has been set
+                    elif not self.model.end and self.model.start:
+                        square = Square(row, col, None, float("inf"), SquareType.END)
+
+                        # Don't allow the end square to be added unless it is a different square from the start
+                        # square
+                        if not square.collides(self.model.start):
+                            self.model.end = square
+                            self.model.squares[(row, col)] = square
+                            self.model.game_state = GameState.RUNNING
+
+                    # Only allow creation of walls if the start and end squares have been set
+                    elif self.model.start and self.model.end:
+                        square = Square(row, col, None, 0, SquareType.WALL)
+
+                        # Ensure that the clicked position for a wall isn't that of the start or end square
+                        if not square.collides(self.model.start) and not square.collides(self.model.end):
                             self.model.squares[(row, col)] = square
 
-                        # Only allow the end square to be set if the start square has been set
-                        elif not self.model.end and self.model.start:
-                            square = Square(row, col, None, float("inf"), SquareType.END)
+                # The user has right clicked
+                # Deletion of independent squares
+                elif pygame.mouse.get_pressed()[2]:
+                    click_pos = pygame.mouse.get_pos()
+                    row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
 
-                            # Don't allow the end square to be added unless it is a different square from the start
-                            # square
-                            if not square.collides(self.model.start):
-                                self.model.end = square
-                                self.model.squares[(row, col)] = square
-                                self.model.game_state = GameState.RUNNING
+                    square = self.model.squares[(row, col)]
 
-                        # Only allow creation of walls if the start and end squares have been set
-                        elif self.model.start and self.model.end:
-                            square = Square(row, col, None, 0, SquareType.WALL)
+                    if square == self.model.start:
+                        self.model.start = None
+                        self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
+                        pygame.draw.rect(self.screen, WHITE,
+                                         (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                        self.draw()
 
-                            # Ensure that the clicked position for a wall isn't that of the start or end square
-                            if not square.collides(self.model.start) and not square.collides(self.model.end):
-                                self.model.squares[(row, col)] = square
+                    elif square == self.model.end:
+                        self.model.end = None
+                        self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
+                        pygame.draw.rect(self.screen, WHITE,
+                                         (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                        self.draw()
 
-                    # The user has right clicked
-                    # Deletion of independent squares
-                    elif pygame.mouse.get_pressed()[2]:
-                        click_pos = pygame.mouse.get_pos()
-                        row, col = (get_clicked_pos(click_pos, (WIDTH // SQUARE_SIZE), WIDTH))
-
-                        square = self.model.squares[(row, col)]
-
-                        if square == self.model.start:
-                            self.model.start = None
-                            self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
-                            pygame.draw.rect(self.screen, WHITE,
-                                             (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-                            self.draw()
-
-                        elif square == self.model.end:
-                            self.model.end = None
-                            self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
-                            pygame.draw.rect(self.screen, WHITE,
-                                             (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-                            self.draw()
-
-                        elif square.square_type is SquareType.WALL:
-                            self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
-                            pygame.draw.rect(self.screen, WHITE,
-                                             (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-                            self.draw()
+                    elif square.square_type is SquareType.WALL:
+                        self.model.squares[(row, col)] = Square(row, col, None, float("inf"), SquareType.NORMAL)
+                        pygame.draw.rect(self.screen, WHITE,
+                                         (square.x * SQUARE_SIZE, square.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                        self.draw()
             self.draw()
 
         pygame.quit()
