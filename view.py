@@ -401,7 +401,7 @@ class Model:
         int
             The Manhattan distance between a and b.
         """
-        pass
+        return abs(a.x - b.x) + abs(a.y - b.y)
 
     def a_star(self, draw):
         """
@@ -420,7 +420,49 @@ class Model:
         -----
 
         """
-        pass
+        i = 0
+        pq = heapdict()
+        # The start square's distance from itself is 0
+        pq[self.__start] = 0
+
+        while pq:
+            # A tuple is returned, where the fist item is the square and the second value is distance (priority)
+            u = pq.popitem()[0]
+
+            neighbors = self.get_neighbors(u)
+            for v in neighbors:
+
+                if v.square_type is SquareType.NORMAL or v.square_type is SquareType.END:
+                    cost = math.dist((u.x, u.y), (v.x, v.y))
+
+                    if u.distance_from_source + cost < v.distance_from_source:
+                        v.distance_from_source = u.distance_from_source + cost
+                        v.prev = u
+
+                        # Only change type to DONE if the square is not the end square
+                        if v.square_type is not SquareType.END:
+                            v.square_type = SquareType.DONE
+
+                        # Decrease priority (update the priority of current square in priority queue)
+                        # Update priority based on the heuristic method
+                        pq[v] = v.distance_from_source + self.__h(self.end, v)
+
+                if i % 30 == 0:
+                    draw()
+
+                i += 1
+
+                # The end square has been reached
+                if v == self.__end or v.square_type is SquareType.END:
+                    self.shortest_path = self.get_shortest_path()
+                    # Notify the pygame event queue that the algorithm has terminated: draw the shortest path
+                    pygame.event.post(done_e)
+
+                    return v
+            # clock.tick(60)
+
+        # print("Algorithm terminated and pq empty")
+        pygame.event.post(unreachable_e)
 
     def get_shortest_path(self):
         """
@@ -613,7 +655,7 @@ class GraphicalView:
                             if self.model.algorithm_type is AlgorithmType.DIJKSTRA:
                                 self.model.dijkstra(lambda: self.draw(), self.clock)
                             else:
-                                print("A*")
+                                self.model.a_star(lambda: self.draw())
 
                     # Clearing the entire grid
                     elif event.key == pygame.K_c:
