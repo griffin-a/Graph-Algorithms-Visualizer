@@ -32,7 +32,7 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 ORANGE = (255, 165, 0)
 BLACK = (0, 0, 0)
-WIDTH = HEIGHT = 600
+WIDTH = HEIGHT = 1000
 SQUARE_SIZE = 20
 
 # User events
@@ -451,7 +451,7 @@ class Model:
                         # Update priority based on the heuristic method
                         pq[v] = v.distance_from_source + self.__h(self.end, v)
 
-                if i % 30 == 0:
+                if i % 100 == 0:
                     draw()
 
                 i += 1
@@ -471,6 +471,7 @@ class Model:
     def bfs(self, draw):
         # deque to be used as a queue due to efficient push/pop operations on both ends of deque
         queue = deque()
+        queue.append(self.__start)
         # Not needed due to the inherent state of Squares
         # visited = set()
         i = 0
@@ -492,6 +493,9 @@ class Model:
                 draw()
 
             i += 1
+
+        pygame.event.post(unreachable_e)
+
 
 
     def get_shortest_path(self):
@@ -539,7 +543,6 @@ class Model:
     def cycle_algorithm(self):
         i = int(self.algorithm_type)
         self.algorithm_type = (i + 1) % len(AlgorithmType)
-        print(self.algorithm_type)
 
 
 def get_clicked_pos(pos, rows, width):
@@ -680,15 +683,15 @@ class GraphicalView:
                 if event.type == pygame.KEYDOWN:
                     # Space key for start/stopping the visualizer
                     # As of now, only starting the visualizer works
-                    if self.model.game_state is GameState.RUNNING:
-                        if event.key == pygame.K_SPACE and self.model.start and self.model.end:
-                            if self.model.algorithm_type is AlgorithmType.DIJKSTRA:
-                                self.model.dijkstra(lambda: self.draw(), self.clock)
-                            elif self.model.algorithm_type is AlgorithmType.A_STAR:
-                                self.model.a_star(lambda: self.draw())
-                            elif self.model.algorithm_type is AlgorithmType.BFS:
-                                self.model.bfs(lambda: self.draw())
-                                print("BFS")
+                    # if self.model.game_state is GameState.RUNNING:
+                    if event.key == pygame.K_SPACE and self.model.start and self.model.end:
+                        if self.model.algorithm_type is AlgorithmType.DIJKSTRA:
+                            self.model.dijkstra(lambda: self.draw(), self.clock)
+                        elif self.model.algorithm_type is AlgorithmType.A_STAR:
+                            self.model.a_star(lambda: self.draw())
+                        elif self.model.algorithm_type is AlgorithmType.BFS:
+                            self.model.bfs(lambda: self.draw())
+                            print("BFS")
 
                     # Clearing the entire grid
                     elif event.key == pygame.K_c:
@@ -698,9 +701,17 @@ class GraphicalView:
                         self.screen.fill(WHITE)
                         self.draw()
 
-                    elif event.key == pygame.K_a:
-                        print("Change algorithm")
-                        self.model.cycle_algorithm()
+                    # elif event.key == pygame.K_a:
+                    #     print("Change algorithm")
+                    #     self.model.cycle_algorithm()
+                    #     print(self.model.algorithm_type)
+
+                    elif event.key == pygame.K_1:
+                        self.model.algorithm_type = AlgorithmType.DIJKSTRA
+                    elif event.key == pygame.K_2:
+                        self.model.algorithm_type = AlgorithmType.A_STAR
+                    elif event.key == pygame.K_3:
+                        self.model.algorithm_type = AlgorithmType.BFS
 
                 # The user has left clicked
                 if pygame.mouse.get_pressed()[0]:
