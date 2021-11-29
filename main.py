@@ -18,6 +18,7 @@ Notes
 -----
 Uses pygame and heapdict (priority queue/heap implementation)
 """
+from collections import deque
 
 import pygame
 from heapdict import heapdict
@@ -49,7 +50,8 @@ class GameState(Enum):
 
 class AlgorithmType(IntEnum):
     DIJKSTRA = 0,
-    A_STAR = 1
+    A_STAR = 1,
+    BFS = 2
 
 
 class SquareType(Enum):
@@ -466,6 +468,32 @@ class Model:
         # print("Algorithm terminated and pq empty")
         pygame.event.post(unreachable_e)
 
+    def bfs(self, draw):
+        # deque to be used as a queue due to efficient push/pop operations on both ends of deque
+        queue = deque()
+        # Not needed due to the inherent state of Squares
+        # visited = set()
+        i = 0
+
+        while queue:
+            u = queue.popleft()
+            neighbors = self.get_neighbors(u)
+
+            for v in neighbors:
+                if v.square_type is SquareType.END or v == self.__end:
+                    self.shortest_path = self.get_shortest_path()
+                    pygame.event.post(done_e)
+                    return v
+                if v.square_type is SquareType.NORMAL:
+                    queue.append(v)
+                    v.square_type = SquareType.DONE
+
+            if i % 30 == 0:
+                draw()
+
+            i += 1
+
+
     def get_shortest_path(self):
         """
         Get the shortest path from start to end
@@ -656,8 +684,11 @@ class GraphicalView:
                         if event.key == pygame.K_SPACE and self.model.start and self.model.end:
                             if self.model.algorithm_type is AlgorithmType.DIJKSTRA:
                                 self.model.dijkstra(lambda: self.draw(), self.clock)
-                            else:
+                            elif self.model.algorithm_type is AlgorithmType.A_STAR:
                                 self.model.a_star(lambda: self.draw())
+                            elif self.model.algorithm_type is AlgorithmType.BFS:
+                                self.model.bfs(lambda: self.draw())
+                                print("BFS")
 
                     # Clearing the entire grid
                     elif event.key == pygame.K_c:
